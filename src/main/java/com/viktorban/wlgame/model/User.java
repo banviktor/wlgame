@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -35,10 +37,10 @@ public class User implements UserDetails {
 
     public User(String username, String password, String email, boolean enabled) {
         this();
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.enabled = enabled;
+        this.setUsername(username);
+        this.setPassword(password);
+        this.setEmail(email);
+        this.setEnabled(enabled);
     }
 
     public long getId() {
@@ -60,7 +62,8 @@ public class User implements UserDetails {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
     }
 
     public String getEmail() {
