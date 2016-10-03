@@ -2,6 +2,7 @@ package com.viktorban.wlgame.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.viktorban.wlgame.Application;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -62,7 +63,7 @@ public class User implements UserDetails {
     }
 
     public void setPassword(String password) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        PasswordEncoder encoder = (PasswordEncoder) Application.getContext().getBean("passwordEncoder");
         this.password = encoder.encode(password);
     }
 
