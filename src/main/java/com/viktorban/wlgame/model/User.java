@@ -63,8 +63,7 @@ public class User implements UserDetails {
     }
 
     public void setPassword(String password) {
-        PasswordEncoder encoder = (PasswordEncoder) Application.getContext().getBean("passwordEncoder");
-        this.password = encoder.encode(password);
+        this.password = Application.getPasswordEncoder().encode(password);
     }
 
     public String getEmail() {
