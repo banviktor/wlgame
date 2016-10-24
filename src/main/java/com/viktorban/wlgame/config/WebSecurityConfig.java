@@ -1,10 +1,10 @@
 package com.viktorban.wlgame.config;
 
-import com.viktorban.wlgame.controller.UserRepository;
+import com.viktorban.wlgame.model.User;
 import com.viktorban.wlgame.model.UserWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +28,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean(name = "passwordEncoder")
     public PasswordEncoder getPasswordEncoder() {
@@ -34,16 +37,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Service
     public class UserDetailsServiceImpl implements UserDetailsService {
-        private final UserRepository userRepository;
-
-        @Autowired
-        public UserDetailsServiceImpl(UserRepository userRepository) {
-            this.userRepository = userRepository;
-        }
+        @PersistenceContext
+        private EntityManager entityManager;
 
         @Override
         public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-            return new UserWrapper(userRepository.findByName(username));
+            try {
+                User user = (User)entityManager
+                        .createQuery("SELECT u FROM com.viktorban.wlgame.model.User u WHERE u.name = :username")
+                        .setParameter("username", username)
+                        .getSingleResult();
+                return new UserWrapper(user);
+            }
+            catch (Exception e) {
+                throw new UsernameNotFoundException("Username not found.", e);
+            }
         }
 
     }
@@ -53,6 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                     .antMatchers("/*").permitAll()
+                    .antMatchers("/api").authenticated()
                     .antMatchers("/api/login").permitAll()
                     .antMatchers("/api/logout").permitAll()
                     .antMatchers("/api/**").authenticated()

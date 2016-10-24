@@ -1,5 +1,6 @@
 package com.viktorban.wlgame.config;
 
+import com.viktorban.wlgame.model.Role;
 import com.viktorban.wlgame.model.User;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +33,27 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
     }
 
     private void initialize() {
-        User u = new User("user", "pass", "user@example.com", true);
-        entityManager.persist(u);
+        // Create roles.
+        Role rolePlayer = new Role("PLAYER");
+        entityManager.persist(rolePlayer);
+        Role roleModerator = new Role("MODERATOR");
+        entityManager.persist(roleModerator);
+        Role roleAdministrator = new Role("ADMINISTRATOR");
+        entityManager.persist(roleAdministrator);
+
+        // Create player.
+        User player = new User("user", "user", "user@example.com", true);
+        player.addRole(rolePlayer);
+        entityManager.persist(player);
+
+        // Create moderator.
+        User moderator = new User("mod", "mod", "mod@example.com", true);
+        moderator.addRole(rolePlayer).addRole(roleModerator);
+        entityManager.persist(moderator);
+
+        // Create administrator.
+        User administrator = new User("admin", "admin", "admin@example.com", true);
+        administrator.addRole(rolePlayer).addRole(roleModerator).addRole(roleAdministrator);
+        entityManager.persist(administrator);
     }
 }

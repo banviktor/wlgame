@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.viktorban.wlgame.Application;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private long id;
 
     @Column(name = "name", unique = true, nullable = false, updatable = false)
@@ -25,8 +28,17 @@ public class User {
     @Column(name = "status")
     private boolean enabled;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name="users_roles",
+            joinColumns=@JoinColumn(name="uid", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="rid", referencedColumnName="id")
+    )
+    private List<Role> roles;
+
     public User() {
         this.enabled = true;
+        this.roles = new ArrayList<>();
     }
 
     public User(String name, String password, String email, boolean enabled) {
@@ -71,5 +83,18 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public User addRole(Role role) {
+        this.roles.add(role);
+        return this;
     }
 }
