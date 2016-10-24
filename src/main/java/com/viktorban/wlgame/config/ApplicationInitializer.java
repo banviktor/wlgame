@@ -14,25 +14,13 @@ import javax.persistence.PersistenceContext;
 
 @Component
 public class ApplicationInitializer implements ApplicationListener<ContextRefreshedEvent> {
-
     private Log log = LogFactory.getLog(ApplicationInitializer.class);
 
-    /**
-     * EntityManager instance.
-     */
     @PersistenceContext
     private EntityManager entityManager;
 
-    /**
-     * Indicates whether initialization has been done.
-     */
     private static boolean initialized = false;
 
-    /**
-     * Listens for context refresh events, runs initialize() once.
-     *
-     * @param event The event object.
-     */
     @EventListener
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -43,12 +31,8 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         }
     }
 
-    /**
-     * Initializes the application to have some sample data to work with.
-     */
     private void initialize() {
         User u = new User("user", "pass", "user@example.com", true);
         entityManager.persist(u);
     }
-
 }
