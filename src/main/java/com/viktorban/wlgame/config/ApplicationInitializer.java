@@ -13,15 +13,33 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+/**
+ * Class for application initialization.
+ */
 @Component
 public class ApplicationInitializer implements ApplicationListener<ContextRefreshedEvent> {
+
+    /**
+     * Logger object.
+     */
     private Log log = LogFactory.getLog(ApplicationInitializer.class);
 
+    /**
+     * JPA entity manager.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * Indicates whether initialization has been done.
+     */
     private static boolean initialized = false;
 
+    /**
+     * Listens to 'ContextRefreshedEvent's.
+     *
+     * @param event The event.
+     */
     @EventListener
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -32,6 +50,9 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         }
     }
 
+    /**
+     * Does the application's initialization.
+     */
     private void initialize() {
         // Create roles.
         Role rolePlayer = new Role("PLAYER");
@@ -56,4 +77,5 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         administrator.addRole(rolePlayer).addRole(roleModerator).addRole(roleAdministrator);
         entityManager.persist(administrator);
     }
+
 }

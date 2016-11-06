@@ -7,11 +7,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for Users.
+ *
+ * @see com.viktorban.wlgame.model.User
+ */
 @RestController
 public class UserController {
+
+    /**
+     * Returns the logged in user.
+     *
+     * @return The logged in user.
+     */
     @RequestMapping(path = "/api/me", method = RequestMethod.GET)
     public User currentUser() {
         UserWrapper userWrapper = (UserWrapper) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userWrapper.getUser();
     }
+
 }

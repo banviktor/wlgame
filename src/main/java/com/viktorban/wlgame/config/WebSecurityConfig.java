@@ -26,20 +26,42 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Configures everything security-related.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    /**
+     * Returns the password encoder bean.
+     *
+     * @return The password encoder bean.
+     */
     @Bean(name = "passwordEncoder")
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Custom UserDetailsService implementation to use User entities for authentication.
+     *
+     * @see com.viktorban.wlgame.model.User
+     * @see com.viktorban.wlgame.model.UserWrapper
+     */
     @Service
     public class UserDetailsServiceImpl implements UserDetailsService {
+
+        /**
+         * JPA entity manager.
+         */
         @PersistenceContext
         private EntityManager entityManager;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
             try {
@@ -56,6 +78,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -87,4 +112,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
         ;
     }
+
 }
