@@ -20,7 +20,7 @@ public class ApiController implements ResourceProcessor<RepositoryLinksResource>
     @Override
     public RepositoryLinksResource process(RepositoryLinksResource resource) {
         if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
-            resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(UserController.class).currentUser()).withRel("current_user"));
+            resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(UserController.class).currentUser()).withRel("self"));
         }
         return resource;
     }

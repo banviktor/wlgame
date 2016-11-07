@@ -20,7 +20,7 @@ public class UserController {
      *
      * @return The logged in user.
      */
-    @RequestMapping(path = "/api/me", method = RequestMethod.GET)
+    @RequestMapping(path = "/api/self", method = RequestMethod.GET)
     public User currentUser() {
         UserWrapper userWrapper = (UserWrapper) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userWrapper.getUser();
