@@ -1,7 +1,9 @@
 package com.viktorban.wlgame.config;
 
+import com.viktorban.wlgame.model.Language;
 import com.viktorban.wlgame.model.Role;
 import com.viktorban.wlgame.model.User;
+import com.viktorban.wlgame.model.Word;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationListener;
@@ -79,6 +81,22 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         administrator.addRole(roleModerator);
         administrator.addRole(roleAdministrator);
         entityManager.persist(administrator);
+
+        // Create languages.
+        Language langEnglish = new Language("en", "english");
+        entityManager.persist(langEnglish);
+        Language langHungarian = new Language("hu", "hungarian");
+        entityManager.persist(langHungarian);
+
+        // Create some test words.
+        Word wEnCat = new Word(langEnglish, "cat");
+        Word wHuCat1 = new Word(langHungarian, "macska");
+        Word wHuCat2 = new Word(langHungarian, "cica");
+        entityManager.persist(wHuCat1);
+        entityManager.persist(wHuCat2);
+        wEnCat.addTranslation(wHuCat1);
+        wEnCat.addTranslation(wHuCat2);
+        entityManager.persist(wEnCat);
     }
 
 }

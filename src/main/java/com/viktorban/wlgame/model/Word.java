@@ -1,12 +1,16 @@
 package com.viktorban.wlgame.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a word.
  */
 @Entity
-@Table(name = "dictionary")
+@Table(name = "words")
 public class Word {
 
     /**
@@ -18,16 +22,54 @@ public class Word {
     private long id;
 
     /**
-     * The word in the original language (english).
+     * The language of the word.
      */
-    @Column(name = "original", nullable = false)
-    private String original;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "language_id")
+    private Language language;
 
     /**
-     * The translated word (hungarian).
+     * The actual word.
      */
-    @Column(name = "translated", nullable = false)
-    private String translated;
+    @Column(name = "word", unique = true, nullable = false)
+    private String word;
+
+    /**
+     * The equivalents of this word in other languages.
+     */
+    @ManyToMany()
+    @JoinTable(
+            name = "translations",
+            joinColumns=@JoinColumn(name="word1_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="word2_id", referencedColumnName="id")
+    )
+    private List<Word> translations;
+
+    /**
+     * The words that map this as their translation.
+     */
+    @ManyToMany(mappedBy = "translations")
+    private List<Word> reverseTranslations;
+
+    /**
+     * Word default constructor.
+     */
+    public Word() {
+        translations = new ArrayList<>();
+        reverseTranslations = new ArrayList<>();
+    }
+
+    /**
+     * Word constructor specifying all the required fields.
+     *
+     * @param language The word's language.
+     * @param word     The actual word.
+     */
+    public Word(Language language, String word) {
+        this();
+        this.setLanguage(language);
+        this.setWord(word);
+    }
 
     /**
      * Returns the word ID.
@@ -39,43 +81,81 @@ public class Word {
     }
 
     /**
-     * Returns the word in the original language.
+     * Returns the language of the word.
      *
-     * @return The word in the original language.
+     * @return The language of the word.
      */
-    public String getOriginal() {
-        return original;
+    public Language getLanguage() {
+        return language;
     }
 
     /**
-     * Sets the word in the original language.
-     *
-     * @param original The word in the original language to set.
-     * @return The word.
+     * Sets the language of the word.
+     * @param language
      */
-    public Word setOriginal(String original) {
-        this.original = original;
-        return this;
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 
     /**
-     * Returns the translated word.
+     * Returns the actual word.
      *
-     * @return The translated word.
+     * @return The actual word.
      */
-    public String getTranslated() {
-        return translated;
+    public String getWord() {
+        return word;
     }
 
     /**
-     * Sets the translated word.
+     * Sets the actual word.
      *
-     * @param translated The translated word to set.
-     * @return The word.
+     * @param word The actual word to set.
      */
-    public Word setTranslated(String translated) {
-        this.translated = translated;
-        return this;
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    /**
+     * Returns the combined list of translations.
+     *
+     * @return The combined list of translations.
+     */
+    public List<Word> getTranslations() {
+        List<Word> combined = new ArrayList<>();
+        combined.addAll(translations);
+        combined.addAll(reverseTranslations);
+        return combined;
+    }
+
+    /**
+     * Gets the translation of the word in the given language.
+     *
+     * @param language The target language.
+     * @return The translation, or null if not found.
+     */
+    public Word getTranslation(Language language) {
+        for (Word translation : getTranslations()) {
+            if (translation.language == language) {
+                return translation;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds the given translation.
+     *
+     * @param translation The translation.
+     */
+    public void addTranslation(Word translation) {
+        translations.add(translation);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        return word;
     }
 
 }
