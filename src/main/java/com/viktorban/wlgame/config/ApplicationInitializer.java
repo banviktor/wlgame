@@ -69,12 +69,15 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
 
         // Create moderator.
         User moderator = new User("mod", "mod", "mod@example.com", true);
-        moderator.addRole(rolePlayer).addRole(roleModerator);
+        moderator.addRole(rolePlayer);
+        moderator.addRole(roleModerator);
         entityManager.persist(moderator);
 
         // Create administrator.
         User administrator = new User("admin", "admin", "admin@example.com", true);
-        administrator.addRole(rolePlayer).addRole(roleModerator).addRole(roleAdministrator);
+        administrator.addRole(rolePlayer);
+        administrator.addRole(roleModerator);
+        administrator.addRole(roleAdministrator);
         entityManager.persist(administrator);
     }
 

@@ -109,11 +109,9 @@ public class User {
      * Sets the username.
      *
      * @param name The username to set.
-     * @return The user.
      */
-    public User setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
     /**
@@ -129,11 +127,9 @@ public class User {
      * Sets the password.
      *
      * @param password Plaintext password to set.
-     * @return The user.
      */
-    public User setPassword(String password) {
+    public void setPassword(String password) {
         this.password = Application.getPasswordEncoder().encode(password);
-        return this;
     }
 
     /**
@@ -149,11 +145,9 @@ public class User {
      * Sets the e-mail address.
      *
      * @param email E-mail address to set.
-     * @return The user.
      */
-    public User setEmail(String email) {
+    public void setEmail(String email) {
         this.email = email;
-        return this;
     }
 
     /**
@@ -169,11 +163,9 @@ public class User {
      * Sets the user status.
      *
      * @param enabled The user status to set.
-     * @return The user.
      */
-    public User setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        return this;
     }
 
     /**
@@ -189,21 +181,18 @@ public class User {
      * Sets the list of roles.
      *
      * @param roles List of roles to set.
-     * @return The user.
      */
-    public User setRoles(List<Role> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
-        return this;
     }
 
     /**
      * Adds a role to the user's list of roles.
      *
      * @param role The role to add.
-     * @return The user.
      */
-    public User addRole(Role role) {
+    public void addRole(Role role) {
         this.roles.add(role);
-        return this;
     }
+
 }
