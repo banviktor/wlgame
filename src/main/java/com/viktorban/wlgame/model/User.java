@@ -195,4 +195,16 @@ public class User {
         this.roles.add(role);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            User otherUser = (User) obj;
+            return id == otherUser.id;
+        }
+        return false;
+    }
+
 }
