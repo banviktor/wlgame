@@ -57,29 +57,29 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
      */
     private void initialize() {
         // Create roles.
-        Role rolePlayer = new Role("PLAYER");
-        entityManager.persist(rolePlayer);
-        Role roleModerator = new Role("MODERATOR");
-        entityManager.persist(roleModerator);
-        Role roleAdministrator = new Role("ADMINISTRATOR");
-        entityManager.persist(roleAdministrator);
+        Role.ROLE_PLAYER = new Role("PLAYER");
+        entityManager.persist(Role.ROLE_PLAYER);
+        Role.ROLE_MODERATOR = new Role("MODERATOR");
+        entityManager.persist(Role.ROLE_MODERATOR);
+        Role.ROLE_ADMINISTRATOR = new Role("ADMINISTRATOR");
+        entityManager.persist(Role.ROLE_ADMINISTRATOR);
 
         // Create player.
         User player = new User("user", "user", "user@example.com", true);
-        player.addRole(rolePlayer);
+        player.addRole(Role.ROLE_PLAYER);
         entityManager.persist(player);
 
         // Create moderator.
         User moderator = new User("mod", "mod", "mod@example.com", true);
-        moderator.addRole(rolePlayer);
-        moderator.addRole(roleModerator);
+        moderator.addRole(Role.ROLE_PLAYER);
+        moderator.addRole(Role.ROLE_MODERATOR);
         entityManager.persist(moderator);
 
         // Create administrator.
         User administrator = new User("admin", "admin", "admin@example.com", true);
-        administrator.addRole(rolePlayer);
-        administrator.addRole(roleModerator);
-        administrator.addRole(roleAdministrator);
+        administrator.addRole(Role.ROLE_PLAYER);
+        administrator.addRole(Role.ROLE_MODERATOR);
+        administrator.addRole(Role.ROLE_ADMINISTRATOR);
         entityManager.persist(administrator);
 
         // Create languages.

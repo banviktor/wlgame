@@ -13,6 +13,21 @@ import javax.persistence.*;
 public class Role implements GrantedAuthority {
 
     /**
+     * The default player role.
+     */
+    public static Role ROLE_PLAYER;
+
+    /**
+     * The default moderator role.
+     */
+    public static Role ROLE_MODERATOR;
+
+    /**
+     * The default administrator role.
+     */
+    public static Role ROLE_ADMINISTRATOR;
+
+    /**
      * Automatically generated role identifier.
      */
     @Id
@@ -76,6 +91,18 @@ public class Role implements GrantedAuthority {
     @JsonIgnore
     public String getAuthority() {
         return name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Role) {
+            Role otherRole = (Role) obj;
+            return id == otherRole.id;
+        }
+        return false;
     }
 
 }
