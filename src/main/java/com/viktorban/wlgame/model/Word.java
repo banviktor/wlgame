@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents a word.
@@ -133,13 +134,8 @@ public class Word {
      * @param language The target language.
      * @return The translation, or null if not found.
      */
-    public Word getTranslation(Language language) {
-        for (Word translation : getTranslations()) {
-            if (translation.language == language) {
-                return translation;
-            }
-        }
-        return null;
+    public List<Word> getTranslations(Language language) {
+        return getTranslations().stream().filter(translation -> translation.language == language).collect(Collectors.toList());
     }
 
     /**
