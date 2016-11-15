@@ -40,8 +40,8 @@ public class Word {
     @ManyToMany()
     @JoinTable(
             name = "translations",
-            joinColumns=@JoinColumn(name="word1_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="word2_id", referencedColumnName="id")
+            joinColumns = @JoinColumn(name="word1_id", referencedColumnName="id"),
+            inverseJoinColumns = @JoinColumn(name="word2_id", referencedColumnName="id")
     )
     private List<Word> translations;
 
