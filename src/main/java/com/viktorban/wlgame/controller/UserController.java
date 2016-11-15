@@ -1,5 +1,6 @@
 package com.viktorban.wlgame.controller;
 
+import com.viktorban.wlgame.Application;
 import com.viktorban.wlgame.model.User;
 import com.viktorban.wlgame.model.UserWrapper;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
@@ -24,8 +25,7 @@ public class UserController {
      */
     @RequestMapping(path = "/self", method = RequestMethod.GET)
     public User currentUser() {
-        UserWrapper userWrapper = (UserWrapper) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userWrapper.getUser();
+        return Application.getCurrentUser();
     }
 
 }

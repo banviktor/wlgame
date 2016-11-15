@@ -1,15 +1,21 @@
 package com.viktorban.wlgame;
 
+import com.viktorban.wlgame.model.User;
+import com.viktorban.wlgame.model.UserWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Represents the application and contains the entry point.
  */
 @SpringBootApplication
+@Import(RepositoryRestMvcConfiguration.class)
 public class Application {
 
     /**
@@ -43,6 +49,20 @@ public class Application {
      */
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+    /**
+     * Returns the logged in user.
+     *
+     * @return The logged in user.
+     */
+    public static User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserWrapper) {
+            UserWrapper userWrapper = (UserWrapper) principal;
+            return userWrapper.getUser();
+        }
+        return null;
     }
 
 }
