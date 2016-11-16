@@ -86,6 +86,7 @@ public class Word {
      *
      * @return The language of the word.
      */
+    @JsonIgnore
     public Language getLanguage() {
         return language;
     }
@@ -121,6 +122,7 @@ public class Word {
      *
      * @return The combined list of translations.
      */
+    @JsonIgnore
     public List<Word> getTranslations() {
         List<Word> combined = new ArrayList<>();
         combined.addAll(translations);
