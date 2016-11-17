@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,7 +18,7 @@ import javax.persistence.PersistenceContext;
  *
  * @see com.viktorban.wlgame.model.User
  */
-@BasePathAwareController
+@RestController
 public class UserController {
 
     @PersistenceContext
@@ -28,12 +29,13 @@ public class UserController {
      *
      * @return The logged in user.
      */
-    @RequestMapping(path = "/self", method = RequestMethod.GET)
+    @RequestMapping(path = "/api/self", method = RequestMethod.GET)
     public HttpEntity<?> currentUser() {
-        User user = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+        User user = Application.getCurrentUser();
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        user = entityManager.find(User.class, user.getUserId());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
