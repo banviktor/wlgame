@@ -88,8 +88,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/*").permitAll()
                     .antMatchers("/api/login").permitAll()
                     .antMatchers("/api/logout").permitAll()
-                    // .antMatchers("/api/**").authenticated() // TODO readd
-                    .antMatchers("/api/**").permitAll() // TODO remove
+                    .antMatchers("/api/**").authenticated()
+                    .antMatchers("/api/**").permitAll()
                     .and()
                 .formLogin()
                     .loginPage("/api/login")
@@ -106,9 +106,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .permitAll()
                     .and()
                 .csrf()
-                    .disable() // TODO remove
-                    // .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // TODO readd
-                    // .and() // TODO readd
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .and()
                 .exceptionHandling()
                     // Instead of redirecting to /api/login, return with a 401 error code.
                     .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
