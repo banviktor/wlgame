@@ -25,11 +25,11 @@ angular.module('WLGame')
             redirectTo: '/rooms'
         });
     })
-    .run(function($rootScope, $location, user) {
+    .run(function($rootScope, user) {
         $rootScope.$on("$locationChangeStart", function(event, next, current) {
             if (!user.isLoggedIn()) {
                 if (next.templateUrl != 'app/login/loginView.html') {
-                    $location.path('/login');
+                    user.redirectToLogin();
                 }
             }
         });
