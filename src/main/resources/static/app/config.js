@@ -1,4 +1,5 @@
-angular.module('WLGame').config(['$routeProvider', function ($routeProvider) {
+angular.module('WLGame')
+    .config(function ($routeProvider) {
     $routeProvider
         .when('/login', {
             templateUrl: 'app/login/loginView.html',
@@ -23,4 +24,14 @@ angular.module('WLGame').config(['$routeProvider', function ($routeProvider) {
         .otherwise({
             redirectTo: '/rooms'
         });
-}]);
+    })
+    .run(function($rootScope, $location, user) {
+        $rootScope.$on("$locationChangeStart", function(event, next, current) {
+            if (!user.isLoggedIn()) {
+                if (next.templateUrl != 'app/login/loginView.html') {
+                    $location.path('/login');
+                }
+            }
+        });
+    })
+;
