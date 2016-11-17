@@ -3,6 +3,8 @@ package com.viktorban.wlgame.controller;
 import com.viktorban.wlgame.Application;
 import com.viktorban.wlgame.exception.BadRequestException;
 import com.viktorban.wlgame.model.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -28,6 +30,11 @@ import java.util.Map;
  */
 @RestController
 public class RoomController {
+
+    /**
+     * Logger object.
+     */
+    private static Log log = LogFactory.getLog(RoomController.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -72,6 +79,7 @@ public class RoomController {
         RoomPlayer roomPlayer = room.join(player);
         entityManager.persist(room);
         entityManager.persist(roomPlayer);
+        log.info("Room " + room.getRoomId() + " opened.");
         return new ResponseEntity<>(room, HttpStatus.CREATED);
     }
 

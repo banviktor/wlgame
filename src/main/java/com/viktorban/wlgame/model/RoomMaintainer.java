@@ -17,7 +17,7 @@ public class RoomMaintainer {
     /**
      * Logger object.
      */
-    private Log log = LogFactory.getLog(RoomMaintainer.class);
+    private static Log log = LogFactory.getLog(RoomMaintainer.class);
 
     @PersistenceContext
     private EntityManager entityManager;
