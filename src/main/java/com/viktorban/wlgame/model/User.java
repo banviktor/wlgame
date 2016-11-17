@@ -1,7 +1,11 @@
 package com.viktorban.wlgame.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.viktorban.wlgame.Application;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -13,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends ResourceSupport {
 
     /**
      * Automatically generated unique identifier.
@@ -39,12 +43,6 @@ public class User {
     private String password;
 
     /**
-     * E-mail address.
-     */
-    @Column(name = "email", unique = true, nullable = false)
-    private String email;
-
-    /**
      * Whether the user is enabled.
      */
     @Column(name = "status")
@@ -55,7 +53,8 @@ public class User {
      *
      * @see com.viktorban.wlgame.model.Role
      */
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany()
+    @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name="uid", referencedColumnName="id"),
@@ -64,11 +63,19 @@ public class User {
     private List<Role> roles;
 
     /**
+     * The list of rooms the user has ever joined.
+     */
+    @OneToMany(mappedBy = "player")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<RoomPlayer> joinedRooms;
+
+    /**
      * User default constructor.
      */
     public User() {
         this.enabled = true;
         this.roles = new ArrayList<>();
+        this.joinedRooms = new ArrayList<>();
     }
 
     /**
@@ -76,14 +83,12 @@ public class User {
      *
      * @param name      The username.
      * @param password  Plaintext password.
-     * @param email     E-mail address.
      * @param enabled   User status.
      */
-    public User(String name, String password, String email, boolean enabled) {
+    public User(String name, String password, boolean enabled) {
         this();
         this.setName(name);
         this.setPassword(password);
-        this.setEmail(email);
         this.setEnabled(enabled);
     }
 
@@ -92,7 +97,8 @@ public class User {
      *
      * @return The user ID.
      */
-    public long getId() {
+    @JsonProperty("id")
+    public long getUserId() {
         return id;
     }
 
@@ -130,24 +136,6 @@ public class User {
      */
     public void setPassword(String password) {
         this.password = Application.getPasswordEncoder().encode(password);
-    }
-
-    /**
-     * Returns the e-mail address.
-     *
-     * @return The e-mail address.
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the e-mail address.
-     *
-     * @param email E-mail address to set.
-     */
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     /**
@@ -193,6 +181,29 @@ public class User {
      */
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    @JsonIgnore
+    public List<RoomPlayer> getJoinedRooms() {
+        return joinedRooms;
+    }
+
+    public void setJoinedRooms(List<RoomPlayer> joinedRooms) {
+        this.joinedRooms = joinedRooms;
+    }
+
+    /**
+     * Returns the first non-ended room that the player has joined.
+     *
+     * @return The first non-ended room that the player has joined.
+     */
+    public Long getActiveRoomId() {
+        for (RoomPlayer joinedRoom : joinedRooms) {
+            if (joinedRoom.getRoom().getState() != Room.RoomState.ENDED) {
+                return joinedRoom.getRoom().getRoomId();
+            }
+        }
+        return null;
     }
 
     /**

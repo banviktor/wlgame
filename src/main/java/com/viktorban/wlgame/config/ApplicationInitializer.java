@@ -65,18 +65,18 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         entityManager.persist(Role.ROLE_ADMINISTRATOR);
 
         // Create player.
-        User player = new User("user", "user", "user@example.com", true);
+        User player = new User("user", "user", true);
         player.addRole(Role.ROLE_PLAYER);
         entityManager.persist(player);
 
         // Create moderator.
-        User moderator = new User("mod", "mod", "mod@example.com", true);
+        User moderator = new User("mod", "mod", true);
         moderator.addRole(Role.ROLE_PLAYER);
         moderator.addRole(Role.ROLE_MODERATOR);
         entityManager.persist(moderator);
 
         // Create administrator.
-        User administrator = new User("admin", "admin", "admin@example.com", true);
+        User administrator = new User("admin", "admin", true);
         administrator.addRole(Role.ROLE_PLAYER);
         administrator.addRole(Role.ROLE_MODERATOR);
         administrator.addRole(Role.ROLE_ADMINISTRATOR);
@@ -87,16 +87,6 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
         entityManager.persist(langEnglish);
         Language langHungarian = new Language("hu", "hungarian");
         entityManager.persist(langHungarian);
-
-        // Create some test words.
-        Word wEnCat = new Word(langEnglish, "cat");
-        Word wHuCat1 = new Word(langHungarian, "macska");
-        Word wHuCat2 = new Word(langHungarian, "cica");
-        entityManager.persist(wHuCat1);
-        entityManager.persist(wHuCat2);
-        wEnCat.addTranslation(wHuCat1);
-        wEnCat.addTranslation(wHuCat2);
-        entityManager.persist(wEnCat);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.viktorban.wlgame.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -32,13 +34,14 @@ public class Word {
     /**
      * The actual word.
      */
-    @Column(name = "word", unique = true, nullable = false)
+    @Column(name = "word", nullable = false)
     private String word;
 
     /**
      * The equivalents of this word in other languages.
      */
     @ManyToMany()
+    @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(
             name = "translations",
             joinColumns = @JoinColumn(name="word1_id", referencedColumnName="id"),
@@ -50,6 +53,7 @@ public class Word {
      * The words that map this as their translation.
      */
     @ManyToMany(mappedBy = "translations")
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Word> reverseTranslations;
 
     /**
