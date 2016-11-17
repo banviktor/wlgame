@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 public class Room extends ResourceSupport {
 
     public static final int wordsPerPlayer = 10;
+    public static final long timeoutJoin = 5 * 60 * 1000L;
+    public static final long timeoutUploadWords = 5 * 60 * 1000L;
+    public static final long timeoutUploadSolutions = 10 * 60 * 1000L;
 
     /**
      * Enumeration to represent different room states.

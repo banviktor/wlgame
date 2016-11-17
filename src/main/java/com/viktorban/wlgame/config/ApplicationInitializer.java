@@ -3,7 +3,6 @@ package com.viktorban.wlgame.config;
 import com.viktorban.wlgame.model.Language;
 import com.viktorban.wlgame.model.Role;
 import com.viktorban.wlgame.model.User;
-import com.viktorban.wlgame.model.Word;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationListener;
