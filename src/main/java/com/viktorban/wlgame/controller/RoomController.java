@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,41 @@ import java.util.Map;
  * @see com.viktorban.wlgame.model.Room
  */
 @RestController
-public class RoomController {
+public class RoomController implements Serializable {
+
+    private static class FutureRoom {
+
+        private String languageFrom;
+
+        private String languageTo;
+
+        private int maxPlayers;
+
+        public String getLanguageFrom() {
+            return languageFrom;
+        }
+
+        public void setLanguageFrom(String languageFrom) {
+            this.languageFrom = languageFrom;
+        }
+
+        public String getLanguageTo() {
+            return languageTo;
+        }
+
+        public void setLanguageTo(String languageTo) {
+            this.languageTo = languageTo;
+        }
+
+        public int getMaxPlayers() {
+            return maxPlayers;
+        }
+
+        public void setMaxPlayers(int maxPlayers) {
+            this.maxPlayers = maxPlayers;
+        }
+
+    }
 
     /**
      * Logger object.
@@ -42,7 +77,7 @@ public class RoomController {
     @RequestMapping(method = RequestMethod.GET, path = "/api/rooms")
     public HttpEntity<?> getRooms() {
         return new ResponseEntity<>(new Resources(
-                entityManager.createQuery("SELECT r FROM com.viktorban.wlgame.model.Room r").getResultList(),
+                entityManager.createQuery("SELECT r FROM com.viktorban.wlgame.model.Room r WHERE r.state <> 'ENDED'").getResultList(),
                 ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RoomController.class).getRooms()).withRel("self"),
                 ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RoomController.class).getRooms()).withRel("rooms")
         ), HttpStatus.OK);
@@ -51,16 +86,14 @@ public class RoomController {
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms")
-    public HttpEntity<?> openRoom(@RequestParam("maxPlayers") int maxPlayers,
-                                  @RequestParam("languageFrom") String languageFrom,
-                                  @RequestParam("languageTo") String languageTo) {
+    public HttpEntity<?> openRoom(@RequestBody FutureRoom futureRoom) {
         User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
         if (player.getActiveRoomId() != null) {
             throw new AccessDeniedException("Already part of an ongoing room");
         }
 
         // Check max player count.
-        if (maxPlayers < 2 || maxPlayers > 5) {
+        if (futureRoom.getMaxPlayers() < 2 || futureRoom.getMaxPlayers() > 5) {
             throw new BadRequestException("Invalid maxPlayer value - should be between 2 and 5 (incl.)");
         }
 
@@ -68,14 +101,14 @@ public class RoomController {
         Language langLanguageFrom;
         Language langLanguageTo;
         try {
-            langLanguageFrom = entityManager.find(Language.class, languageFrom);
-            langLanguageTo = entityManager.find(Language.class, languageTo);
+            langLanguageFrom = entityManager.find(Language.class, futureRoom.getLanguageFrom());
+            langLanguageTo = entityManager.find(Language.class, futureRoom.getLanguageTo());
         } catch (NoResultException e) {
             throw new BadRequestException("Invalid languageFrom or languageTo value");
         }
 
         // Create room and return it.
-        Room room = new Room(maxPlayers, langLanguageFrom, langLanguageTo);
+        Room room = new Room(futureRoom.getMaxPlayers(), langLanguageFrom, langLanguageTo);
         RoomPlayer roomPlayer = room.join(player);
         entityManager.persist(room);
         entityManager.persist(roomPlayer);
