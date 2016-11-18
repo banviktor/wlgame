@@ -17,7 +17,7 @@ angular.module('WLGame')
             controllerAs: 'roomListCtrl'
         })
         .when('/rooms/:id', {
-            templateUrl: 'app/rooom/roomView.html',
+            templateUrl: 'app/room/roomView.html',
             controller: 'RoomController',
             controllerAs: 'roomCtrl'
         })

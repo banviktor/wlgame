@@ -1,3 +1,3 @@
-angular.module('WLGame').controller('RoomListController', ['$http', function ($http) {
+angular.module('WLGame').controller('RoomController', ['$http', function ($http) {
     var controller = this;
 }]);
