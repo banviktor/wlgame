@@ -1,0 +1,44 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>1st lang.</th>
+            <th>2nd lang.</th>
+            <th>Room name</th>
+            <th>Players</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="room in roomListCtrl.rooms">
+            <td>{{room.languageFrom.name | ucfirst}}</td>
+            <td>{{room.languageTo.name | ucfirst}}</td>
+            <td>Room #{{room.id}}</td>
+            <td>{{room.roomPlayers.length}}/{{room.maxPlayers}}</td>
+            <td>
+                {{room.state == 'WAITING_FOR_PLAYERS' ? 'Joinable' : 'In progress'}}
+            </td>
+            <td>
+                <button class="btn btn-success form-control" ng-click="roomListCtrl.joinRoom(room)" ng-if="room._links.hasOwnProperty('join')">Join</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select ng-model="roomListCtrl.newRoom.languageFrom">
+                    <option value="en">English</option>
+                    <option value="hu">Hungarian</option>
+                </select>
+            </td>
+            <td>
+                <select ng-model="roomListCtrl.newRoom.languageTo">
+                    <option value="en">English</option>
+                    <option value="hu">Hungarian</option>
+                </select>
+            </td>
+            <td>Create a new room</td>
+            <td>0/<input type="number" min="2" max="5" ng-model="roomListCtrl.newRoom.maxPlayers"/></td>
+            <td>New</td>
+            <td><button class="btn btn-success form-control" ng-click="roomListCtrl.createRoom()">Create</button></td>
+        </tr>
+    </tbody>
+</table>
