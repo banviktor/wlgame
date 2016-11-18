@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.viktorban.wlgame.Application;
 import com.viktorban.wlgame.controller.RoomController;
 import com.viktorban.wlgame.exception.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.hateoas.Link;
@@ -124,7 +126,7 @@ public class Room extends ResourceSupport {
 
     public RoomPlayer getRoomPlayer(User player) {
         for (RoomPlayer roomPlayer : roomPlayers) {
-            if (roomPlayer.getPlayer() == player) {
+            if (roomPlayer.getPlayer().equals(player)) {
                 return roomPlayer;
             }
         }

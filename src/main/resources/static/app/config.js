@@ -33,5 +33,12 @@ angular.module('WLGame')
                 }
             }
         });
+        $rootScope.range = function(min, max) {
+            var numbers = [];
+            for (var i = min; i <= max; ++i) {
+                numbers.push(i);
+            }
+            return numbers;
+        };
     })
 ;

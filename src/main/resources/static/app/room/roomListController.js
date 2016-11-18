@@ -55,5 +55,6 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
     };
 
     controller.fetchLanguages();
+    controller.fetchRooms();
     controller.refresher = setInterval(controller.fetchRooms, 3000);
 });
