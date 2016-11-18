@@ -364,12 +364,14 @@ public class Room extends ResourceSupport {
         this.ended = ended;
     }
 
+    @JsonIgnore
     public User getWinner() {
         return winner;
     }
 
-    public String getWinnerPlayer() {
-        return winner == null ? null : winner.getName();
+    @JsonProperty("winner")
+    public String getWinnerName() {
+        return (winner == null) ? null : winner.getName();
     }
 
     public void setWinner(User winner) {
