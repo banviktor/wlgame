@@ -22,6 +22,7 @@ public class ApiController implements ResourceProcessor<RepositoryLinksResource>
         if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
             resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(UserController.class).currentUser()).withRel("self"));
             resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(RoomController.class).getRooms()).withRel("rooms"));
+            resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(LanguageController.class).getLanguages()).withRel("languages"));
         }
         return resource;
     }
