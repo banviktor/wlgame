@@ -1,5 +1,7 @@
-<table class="table table-striped">
-    <thead>
+<div class="col-sm-12">
+    <h1>Word Learning Game <small>Open room list</small></h1>
+    <table class="table table-striped">
+        <thead>
         <tr>
             <th>1st lang.</th>
             <th>2nd lang.</th>
@@ -8,8 +10,8 @@
             <th>Status</th>
             <th></th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         <tr ng-repeat="room in roomListCtrl.rooms">
             <td>{{room.languageFrom.name | ucfirst}}</td>
             <td>{{room.languageTo.name | ucfirst}}</td>
@@ -40,5 +42,6 @@
             <td>New</td>
             <td><button class="btn btn-success form-control" ng-click="roomListCtrl.createRoom()">Create</button></td>
         </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

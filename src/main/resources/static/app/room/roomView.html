@@ -1,0 +1,40 @@
+<div class="col-sm-12">
+    <h1>Word Learning Game <small>Room #{{roomCtrl.room.id}}</small></h1>
+</div>
+<div class="col-sm-3">
+    <h2>Players</h2>
+    <div class="player player-self">
+        <table class="table table-borderless">
+            <tr ng-repeat="player in roomCtrl.players" ng-class="player.self ? 'active' : ''">
+                <td ng-if="!player.placeholder">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                </td>
+                <td ng-if="player.placeholder">
+                    <span class="glyphicon glyphicon-hourglass" aria-hidden="true" style="color:orange"></span>
+                </td>
+                <td ng-if="!player.placeholder" width="100%">
+                    <strong>{{player.name}}</strong>
+                </td>
+                <td ng-if="player.placeholder" colspan="2">
+                    <em>Waiting for player...</em>
+                </td>
+                <td ng-if="!player.placeholder">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true" style="color:green" ng-if="player.ready"></span>
+                    <span class="glyphicon glyphicon-time" aria-hidden="true" style="color:orange" ng-if="!player.ready"></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="col-sm-9">
+    <h2>Game</h2>
+    <div class="alert alert-info" role="alert" ng-if="roomCtrl.room.state == 'WAITING_FOR_PLAYERS'">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{100 * roomCtrl.connectedPlayers / roomCtrl.room.maxPlayers}}" aria-valuemin="0" aria-valuemax="100" style="width: {{100 * roomCtrl.connectedPlayers / roomCtrl.room.maxPlayers}}%;">
+                {{roomCtrl.connectedPlayers}} / {{roomCtrl.room.maxPlayers}}
+            </div>
+        </div>
+        <span class="glyphicon glyphicon-hourglass" aria-hidden="true"></span>
+        Waiting for {{roomCtrl.room.maxPlayers - roomCtrl.connectedPlayers}} more player(s) to join the room.
+    </div>
+</div>

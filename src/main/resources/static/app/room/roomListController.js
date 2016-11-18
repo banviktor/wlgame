@@ -32,7 +32,7 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
     controller.joinRoom = function (room) {
         $http.post(room._links.join.href, {}).then(
             function success () {
-                $location.path('rooms/' + room.id);
+                controller.redirectToRoom(room.id);
             },
             function error() {
                 alert('Failed to join room.');
@@ -42,14 +42,18 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
     controller.createRoom = function () {
         $http.post('api/rooms', controller.newRoom).then(
             function success (response) {
-                $location.path('rooms/' + response.data.id);
+                controller.redirectToRoom(response.data.id);
             },
             function error () {
                 alert('Failed to create room.');
             }
         );
     };
+    controller.redirectToRoom = function (roomID) {
+        clearInterval(controller.refresher);
+        $location.path('rooms/' + roomID);
+    };
 
     controller.fetchLanguages();
-    setInterval(controller.fetchRooms, 3000);
+    controller.refresher = setInterval(controller.fetchRooms, 3000);
 });

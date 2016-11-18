@@ -1,7 +1,3 @@
-body {
-    padding-top: 70px;
-}
-
 .ng-dirty.ng-invalid {
     border-color: #a93032;
 }
@@ -25,4 +21,13 @@ body {
     margin: 0 auto;
     max-width: 300px;
     padding: 12px;
+}
+
+.table-borderless tbody tr td,
+.table-borderless tbody tr th,
+.table-borderless thead tr th,
+.table-borderless thead tr td,
+.table-borderless tfoot tr th,
+.table-borderless tfoot tr td {
+    border: none;
 }
