@@ -32,34 +32,76 @@ import java.util.Map;
 @RestController
 public class RoomController implements Serializable {
 
+    /**
+     * An object used to make a room with.
+     */
     private static class FutureRoom {
 
+        /**
+         * The ID of the From language.
+         */
         private String languageFrom;
 
+        /**
+         * The ID of the To language.
+         */
         private String languageTo;
 
+        /**
+         * Maximum number of players.
+         */
         private int maxPlayers;
 
+        /**
+         * Returns the ID of the From language.
+         *
+         * @return The ID of the From language.
+         */
         public String getLanguageFrom() {
             return languageFrom;
         }
 
+        /**
+         * Sets the ID of the From language.
+         *
+         * @param languageFrom The ID of the From language.
+         */
         public void setLanguageFrom(String languageFrom) {
             this.languageFrom = languageFrom;
         }
 
+        /**
+         * Returns the ID of the To language.
+         *
+         * @return The ID of the To language.
+         */
         public String getLanguageTo() {
             return languageTo;
         }
 
+        /**
+         * Sets the ID of the To language.
+         *
+         * @param languageTo The ID of the To language.
+         */
         public void setLanguageTo(String languageTo) {
             this.languageTo = languageTo;
         }
 
+        /**
+         * Returns the maximum number of players.
+         *
+         * @return The maximum number of players.
+         */
         public int getMaxPlayers() {
             return maxPlayers;
         }
 
+        /**
+         * Sets the maximum number of players.
+         *
+         * @param maxPlayers The maximum number of players.
+         */
         public void setMaxPlayers(int maxPlayers) {
             this.maxPlayers = maxPlayers;
         }
@@ -71,9 +113,17 @@ public class RoomController implements Serializable {
      */
     private static Log log = LogFactory.getLog(RoomController.class);
 
+    /**
+     * JPA entity manager.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * Returns the open game rooms.
+     *
+     * @return The open game rooms.
+     */
     @RequestMapping(method = RequestMethod.GET, path = "/api/rooms")
     public HttpEntity<?> getRooms() {
         return new ResponseEntity<>(new Resources(
@@ -83,6 +133,12 @@ public class RoomController implements Serializable {
         ), HttpStatus.OK);
     }
 
+    /**
+     * Opens a new room.
+     *
+     * @param futureRoom Data to open the room with.
+     * @return The opened room.
+     */
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms")
@@ -112,10 +168,16 @@ public class RoomController implements Serializable {
         RoomPlayer roomPlayer = room.join(player);
         entityManager.persist(room);
         entityManager.persist(roomPlayer);
-        log.info("Room " + room.getRoomId() + " opened.");
+        log.info("Opened " + room.toString());
         return new ResponseEntity<>(room, HttpStatus.CREATED);
     }
 
+    /**
+     * Returns the details of a room.
+     *
+     * @param id The room's ID.
+     * @return The room's details.
+     */
     @RequestMapping(method = RequestMethod.GET, path = "/api/rooms/{id}")
     public HttpEntity<?> getRoom(@PathVariable("id") String id) {
         try {
@@ -131,6 +193,12 @@ public class RoomController implements Serializable {
         }
     }
 
+    /**
+     * Makes the logged in user join a room.
+     *
+     * @param id The room's ID.
+     * @return The room's details.
+     */
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/join")
@@ -145,6 +213,7 @@ public class RoomController implements Serializable {
             RoomPlayer roomPlayer = room.join(player);
             entityManager.persist(roomPlayer);
             entityManager.flush();
+            log.info("Player " + player.getName() + " joined " + room.toString());
             return new ResponseEntity<>(room, HttpStatus.OK);
         }
         catch (NumberFormatException | NoResultException e) {
@@ -152,11 +221,19 @@ public class RoomController implements Serializable {
         }
     }
 
+    /**
+     * Uploads words into a room.
+     *
+     * @param id The room's ID.
+     * @param uploadedWords The words to upload.
+     * @return The room's details.
+     */
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/upload_words")
     public HttpEntity<?> uploadWords(@PathVariable("id") String id, @RequestBody Map<String, String> uploadedWords) {
         try {
+            // Get the room and the player.
             Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
@@ -164,7 +241,10 @@ public class RoomController implements Serializable {
             }
             User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
             List<Word> wordList = new ArrayList<>();
+
+            // Make the word objects.
             for (Map.Entry<String, String> uploadedWord : uploadedWords.entrySet()) {
+                // Get or create the primary language word.
                 Word word;
                 try {
                     word = (Word) entityManager
@@ -176,6 +256,8 @@ public class RoomController implements Serializable {
                     word = new Word(room.getLanguageFrom(), uploadedWord.getKey());
                     entityManager.persist(word);
                 }
+
+                // Get or create the translation.
                 Word translation;
                 try {
                     translation = (Word) entityManager
@@ -187,11 +269,15 @@ public class RoomController implements Serializable {
                     translation = new Word(room.getLanguageTo(), uploadedWord.getValue());
                     entityManager.persist(translation);
                 }
+
+                // Add the translation to the list of word's translations if not already in there.
                 if (!word.getTranslations().contains(translation)) {
                     word.addTranslation(translation);
                 }
                 wordList.add(word);
             }
+
+            // Save to database.
             room.uploadWords(player, wordList);
             entityManager.flush();
             return new ResponseEntity<>(room, HttpStatus.OK);
@@ -201,17 +287,27 @@ public class RoomController implements Serializable {
         }
     }
 
+    /**
+     * Uploads solutions into a room.
+     *
+     * @param id The room's ID.
+     * @param uploadedSolutions The solutions to upload.
+     * @return The room's details.
+     */
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/upload_solutions")
     public HttpEntity<?> uploadSolutions(@PathVariable("id") String id, @RequestBody Map<Long, String> uploadedSolutions) {
         try {
+            // Get the room and the player.
             Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
                 throw new NoResultException();
             }
             User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+
+            // Make solution objects.
             List<Solution> solutionList = new ArrayList<>();
             for (Map.Entry<Long, String> uploadedSolution : uploadedSolutions.entrySet()) {
                 Word word = entityManager.find(Word.class, uploadedSolution.getKey());
@@ -222,6 +318,8 @@ public class RoomController implements Serializable {
                 entityManager.persist(solution);
                 solutionList.add(solution);
             }
+
+            // Save to database.
             room.uploadSolutions(player, solutionList);
             entityManager.flush();
             return new ResponseEntity<>(room, HttpStatus.OK);
