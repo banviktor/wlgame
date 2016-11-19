@@ -1,11 +1,9 @@
 angular.module('WLGame').controller('LoginController', function ($http, $httpParamSerializer, user) {
     var controller = this;
 
-    controller.formData = {
-        username: '',
-        password: ''
-    };
+    controller.formData = {};
     controller.formError = null;
+
     controller.login = function () {
         $http({
             method: 'POST',
