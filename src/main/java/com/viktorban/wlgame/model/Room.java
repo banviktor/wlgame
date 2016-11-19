@@ -388,4 +388,12 @@ public class Room extends ResourceSupport {
         this.solutions = solutions;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Room (id: " + getRoomId() + ", maxPlayers: " + getMaxPlayers() + ", lang: " + getLanguageFrom().getId() + "-" + getLanguageTo().getId() +")";
+    }
+
 }
