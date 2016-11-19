@@ -23,7 +23,7 @@ public class ApplicationInitializer implements ApplicationListener<ContextRefres
     /**
      * Logger object.
      */
-    private Log log = LogFactory.getLog(ApplicationInitializer.class);
+    private static Log log = LogFactory.getLog(ApplicationInitializer.class);
 
     /**
      * JPA entity manager.

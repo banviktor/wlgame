@@ -51,11 +51,11 @@ public class Room extends ResourceSupport {
     @Column(name = "max_players")
     private int maxPlayers;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "language1_id", referencedColumnName = "id")
     private Language languageFrom;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "language2_id", referencedColumnName = "id")
     private Language languageTo;
 
@@ -78,10 +78,6 @@ public class Room extends ResourceSupport {
     @Column(name = "ended")
     private Date ended;
 
-    @OneToOne
-    @JoinColumn(name = "winner", referencedColumnName = "id")
-    private User winner;
-
     @OneToMany(mappedBy = "room")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<RoomPlayer> roomPlayers;
@@ -95,13 +91,8 @@ public class Room extends ResourceSupport {
     )
     private List<Word> words;
 
-    @ManyToMany
+    @OneToMany(mappedBy = "room")
     @LazyCollection(LazyCollectionOption.FALSE)
-    @JoinTable(
-            name = "rooms_solutions",
-            joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "solution_id", referencedColumnName = "id")
-    )
     private List<Solution> solutions;
 
     public Room() {
@@ -205,38 +196,8 @@ public class Room extends ResourceSupport {
             }
         }
         if (done) {
-            finishGame();
+            this.setState(RoomState.ENDED);
         }
-    }
-
-    private void finishGame() {
-        // Initialize a score map.
-        Map<User, Integer> scores = new HashMap<>();
-        for (User player : getPlayers()) {
-            scores.put(player, 0);
-        }
-
-        // Evaluate uploaded solutions and determine scores.
-        for (Solution solution : solutions) {
-            solution.evaluate(languageTo);
-            if (solution.isCorrect()) {
-                scores.put(solution.getPlayer(), scores.get(solution.getPlayer()) + 1);
-            }
-        }
-
-        // Select winner.
-        int highScore = -1;
-        User winner = null;
-        for (Map.Entry<User, Integer> scoreEntry : scores.entrySet()) {
-            if (scoreEntry.getValue() > highScore) {
-                highScore = scoreEntry.getValue();
-                winner = scoreEntry.getKey();
-            }
-        }
-
-        // Save data and close the room.
-        this.setWinner(winner);
-        this.setState(RoomState.ENDED);
     }
 
     @Override
@@ -366,18 +327,34 @@ public class Room extends ResourceSupport {
         this.ended = ended;
     }
 
-    @JsonIgnore
-    public User getWinner() {
-        return winner;
-    }
+    public List<String> getWinners() {
+        if (timedOut || state != RoomState.ENDED) {
+            return new ArrayList<>();
+        }
 
-    @JsonProperty("winner")
-    public String getWinnerName() {
-        return (winner == null) ? null : winner.getName();
-    }
+        // Initialize a score map.
+        Map<User, Integer> scores = new HashMap<>();
+        for (User player : getPlayers()) {
+            scores.put(player, 0);
+        }
 
-    public void setWinner(User winner) {
-        this.winner = winner;
+        // Evaluate uploaded solutions and determine scores.
+        solutions.stream().filter(Solution::isCorrect).forEach(solution -> scores.put(solution.getPlayer(), scores.get(solution.getPlayer()) + 1));
+
+        // Select winner.
+        int highScore = -1;
+        List<String> winners = new ArrayList<>();
+        for (Map.Entry<User, Integer> scoreEntry : scores.entrySet()) {
+            if (scoreEntry.getValue() < highScore) {
+                continue;
+            }
+            if (scoreEntry.getValue() > highScore) {
+                winners.clear();
+                highScore = scoreEntry.getValue();
+            }
+            winners.add(scoreEntry.getKey().getName());
+        }
+        return winners;
     }
 
     public List<RoomPlayer> getRoomPlayers() {
@@ -401,7 +378,8 @@ public class Room extends ResourceSupport {
 
     public List<Solution> getSolutions() {
         if (state == RoomState.ENDED) {
-            return solutions;
+            // Return the current user's own solutions.
+            return solutions.stream().filter(solution -> solution.getPlayer().equals(Application.getCurrentUser())).collect(Collectors.toList());
         }
         return null;
     }

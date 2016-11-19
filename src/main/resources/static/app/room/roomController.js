@@ -6,11 +6,20 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
     };
     controller.players = [];
     controller.readyPlayersCount = 0;
-    controller.player = {};
+    controller.player = {
+        winner: false,
+        placeholder: false,
+        uploadedWords: false,
+        uploadedSolutions: false,
+        self: true
+    };
     controller.wordsToUpload = [];
     controller.translationsToUpload = [];
     controller.words = [];
     controller.solutionsToUpload = {};
+    controller.evaluation = {
+        done: false
+    };
 
     controller.refresh = function () {
         $http.get(controller.room._links.self.href).then(
@@ -36,6 +45,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
         var readyPlayers = 0;
         for (var i = 0; i < controller.room.roomPlayers.length; ++i) {
             var player = {
+                winner: false,
                 placeholder: false,
                 name: controller.room.roomPlayers[i].playerName,
                 uploadedWords: controller.room.roomPlayers[i].uploadedWords,
@@ -62,7 +72,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
             if (player.ready) {
                 ++readyPlayers;
             }
-
+            player.winner = controller.room.winners.indexOf(player.name) != -1;
             if (player.self) {
                 controller.players.unshift(player);
                 controller.player = player;
@@ -80,6 +90,9 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
     };
     controller.roomEnded = function () {
         clearInterval(controller.refresher);
+        if (controller.room.solutions.length > 0) {
+            controller.evaluate();
+        }
     };
     controller.uploadWords = function () {
         var wordMap = {};
@@ -98,6 +111,26 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                 controller.refresh();
             }
         )
+    };
+    controller.evaluate = function () {
+        controller.evaluation.numCorrect = 0;
+        controller.evaluation.numIncorrect = 0;
+        controller.evaluation.numSolutions = controller.room.solutions.length;
+        controller.evaluation.mistakes = [];
+        for (var i = 0; i < controller.room.solutions.length; ++i) {
+            var solution = controller.room.solutions[i];
+            if (solution.correct) {
+                ++controller.evaluation.numCorrect;
+            } else {
+                ++controller.evaluation.numIncorrect;
+                controller.evaluation.mistakes.push({
+                    word: solution.word.word,
+                    expected: solution.expected,
+                    input: solution.input
+                });
+            }
+        }
+        controller.evaluation.done = true;
     };
 
     controller.refresh();

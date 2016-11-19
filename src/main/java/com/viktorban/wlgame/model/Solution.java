@@ -1,6 +1,11 @@
 package com.viktorban.wlgame.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "solutions")
@@ -25,22 +30,28 @@ public class Solution {
     @Column(name = "input")
     private String input;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="room_id")
+    private Room room;
+
     @Column(name = "correct")
     private boolean correct;
 
     public Solution() {}
 
-    public Solution(User player, Word word, String input) {
+    public Solution(Room room, User player, Word word, String input) {
+        this.setRoom(room);
         this.setPlayer(player);
         this.setWord(word);
         this.setInput(input);
-
     }
 
+    @JsonIgnore
     public long getId() {
         return id;
     }
 
+    @JsonIgnore
     public User getPlayer() {
         return player;
     }
@@ -63,15 +74,35 @@ public class Solution {
 
     public void setInput(String input) {
         this.input = input.trim().toLowerCase();
+        correct = false;
+        for (Word translation : word.getTranslations(room.getLanguageTo())) {
+            if (translation.getWord().toLowerCase().equals(input)) {
+                correct = true;
+                break;
+            }
+        }
     }
 
     public boolean isCorrect() {
         return correct;
     }
 
-    public void evaluate(Language language) {
-        correct = false;
-        word.getTranslations(language).stream().filter(translation -> translation.getWord().toLowerCase().equals(input)).forEach(translation -> correct = true);
+    public void setCorrect(boolean correct) {
+        this.correct = correct;
+    }
+
+    @JsonIgnore
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public String getExpected() {
+        List<String> translations = word.getTranslations(room.getLanguageTo()).stream().map(Word::getWord).collect(Collectors.toList());
+        return String.join("; ", translations);
     }
 
 }

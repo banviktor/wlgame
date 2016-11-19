@@ -218,7 +218,7 @@ public class RoomController implements Serializable {
                 if (word == null) {
                     throw new BadRequestException("Invalid uploaded solutions.");
                 }
-                Solution solution = new Solution(player, word, uploadedSolution.getValue());
+                Solution solution = new Solution(room, player, word, uploadedSolution.getValue());
                 entityManager.persist(solution);
                 solutionList.add(solution);
             }
