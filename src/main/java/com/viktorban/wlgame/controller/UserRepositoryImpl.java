@@ -13,14 +13,19 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 
-@Component
+/**
+ * @see com.viktorban.wlgame.controller.UserRepositoryCustom
+ */
 public class UserRepositoryImpl implements UserRepositoryCustom {
 
     /**
      * Logger object.
      */
-    private static Log log = LogFactory.getLog(UserRepositoryCustom.class);
+    private static Log log = LogFactory.getLog(UserRepositoryImpl.class);
 
+    /**
+     * JPA entity manager.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -39,6 +44,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
             // Save new user.
             entityManager.persist(s);
+            log.info("Registered " + s.toString());
             if (Application.getCurrentUser() == null) {
                 Application.forceLogin(s);
             }
@@ -70,15 +76,15 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
      */
     @Override
     @Transactional
-    public User findOne(Long aLong) {
+    public User findOne(Long id) {
         // Only for logged in users.
         if (Application.getCurrentUser() == null) {
             throw new AccessDeniedException("Not authorized.");
         }
 
         // Everyone can see themselves, moderators and administrators can see everyone.
-        if (aLong.equals(Application.getCurrentUser().getUserId()) || Application.getCurrentUser().getRoles().contains(Role.ROLE_MODERATOR) || Application.getCurrentUser().getRoles().contains(Role.ROLE_ADMINISTRATOR)) {
-            return entityManager.find(User.class, aLong);
+        if (id.equals(Application.getCurrentUser().getUserId()) || Application.getCurrentUser().getRoles().contains(Role.ROLE_MODERATOR) || Application.getCurrentUser().getRoles().contains(Role.ROLE_ADMINISTRATOR)) {
+            return entityManager.find(User.class, id);
         }
 
         // Anything else is unauthorized.
