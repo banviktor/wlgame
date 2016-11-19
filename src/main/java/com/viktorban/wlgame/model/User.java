@@ -213,7 +213,7 @@ public class User extends ResourceSupport {
     public boolean equals(Object obj) {
         if (obj instanceof User) {
             User otherUser = (User) obj;
-            return id == otherUser.id;
+            return id.equals(otherUser.id);
         }
         return false;
     }

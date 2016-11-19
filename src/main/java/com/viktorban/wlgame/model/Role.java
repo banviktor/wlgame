@@ -100,7 +100,7 @@ public class Role implements GrantedAuthority {
     public boolean equals(Object obj) {
         if (obj instanceof Role) {
             Role otherRole = (Role) obj;
-            return id == otherRole.id;
+            return id.equals(otherRole.id);
         }
         return false;
     }

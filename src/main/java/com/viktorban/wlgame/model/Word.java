@@ -141,7 +141,7 @@ public class Word {
      * @return The translation, or null if not found.
      */
     public List<Word> getTranslations(Language language) {
-        return getTranslations().stream().filter(translation -> translation.language == language).collect(Collectors.toList());
+        return getTranslations().stream().filter(translation -> translation.language.equals(language)).collect(Collectors.toList());
     }
 
     /**

@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class RoomPlayerId implements Serializable {
 
-   private Long room;
+    private Long room;
 
-   private Long player;
+    private Long player;
 
     public Long getRoom() {
         return room;
@@ -28,7 +28,7 @@ public class RoomPlayerId implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof RoomPlayerId) {
             RoomPlayerId otherId = (RoomPlayerId) obj;
-            return otherId.room == room && otherId.player == player;
+            return otherId.room.equals(room) && otherId.player.equals(player);
         }
         return false;
     }
