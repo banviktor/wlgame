@@ -22,7 +22,7 @@ public class Word {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-   private Long id;
+    private Long id;
 
     /**
      * The language of the word.
