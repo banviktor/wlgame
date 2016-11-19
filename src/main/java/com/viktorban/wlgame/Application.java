@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -62,6 +64,17 @@ public class Application {
             return userWrapper.getUser();
         }
         return null;
+    }
+
+    /**
+     * Logs the user in.
+     *
+     * @param user The user to log in.
+     */
+    public static void forceLogin(User user) {
+        UserWrapper userWrapper = new UserWrapper(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userWrapper, null, userWrapper.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 }

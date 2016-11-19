@@ -25,7 +25,7 @@ public class User extends ResourceSupport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private long id;
+   private Long id;
 
     /**
      * User's name.
@@ -98,7 +98,7 @@ public class User extends ResourceSupport {
      * @return The user ID.
      */
     @JsonProperty("id")
-    public long getUserId() {
+    public Long getUserId() {
         return id;
     }
 

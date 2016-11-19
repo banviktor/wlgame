@@ -22,7 +22,7 @@ public class Word {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private long id;
+   private Long id;
 
     /**
      * The language of the word.
@@ -81,7 +81,7 @@ public class Word {
      *
      * @return The word ID.
      */
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

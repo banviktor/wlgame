@@ -42,7 +42,7 @@ public class Room extends ResourceSupport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private long id;
+   private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
@@ -234,7 +234,7 @@ public class Room extends ResourceSupport {
     }
 
     @JsonProperty("id")
-    public long getRoomId() {
+    public Long getRoomId() {
         return id;
     }
 

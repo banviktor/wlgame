@@ -17,7 +17,7 @@ public class Solution {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private long id;
+   private Long id;
 
     @OneToOne
     @JoinColumn(name = "player_id", referencedColumnName = "id")
@@ -47,7 +47,7 @@ public class Solution {
     }
 
     @JsonIgnore
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

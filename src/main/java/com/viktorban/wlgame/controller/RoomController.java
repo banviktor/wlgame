@@ -119,7 +119,7 @@ public class RoomController implements Serializable {
     @RequestMapping(method = RequestMethod.GET, path = "/api/rooms/{id}")
     public HttpEntity<?> getRoom(@PathVariable("id") String id) {
         try {
-            long longId = Long.parseLong(id);
+            Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
                 throw new NoResultException();
@@ -136,7 +136,7 @@ public class RoomController implements Serializable {
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/join")
     public HttpEntity<?> joinRoom(@PathVariable("id") String id) {
         try {
-            long longId = Long.parseLong(id);
+            Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
                 throw new NoResultException();
@@ -157,7 +157,7 @@ public class RoomController implements Serializable {
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/upload_words")
     public HttpEntity<?> uploadWords(@PathVariable("id") String id, @RequestBody Map<String, String> uploadedWords) {
         try {
-            long longId = Long.parseLong(id);
+            Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
                 throw new NoResultException();
@@ -206,7 +206,7 @@ public class RoomController implements Serializable {
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/upload_solutions")
     public HttpEntity<?> uploadSolutions(@PathVariable("id") String id, @RequestBody Map<Long, String> uploadedSolutions) {
         try {
-            long longId = Long.parseLong(id);
+            Long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
             if (room == null) {
                 throw new NoResultException();

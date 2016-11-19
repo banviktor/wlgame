@@ -4,23 +4,23 @@ import java.io.Serializable;
 
 public class RoomPlayerId implements Serializable {
 
-    private long room;
+   private Long room;
 
-    private long player;
+   private Long player;
 
-    public long getRoom() {
+    public Long getRoom() {
         return room;
     }
 
-    public void setRoom(long room) {
+    public void setRoom(Long room) {
         this.room = room;
     }
 
-    public long getPlayer() {
+    public Long getPlayer() {
         return player;
     }
 
-    public void setPlayer(long player) {
+    public void setPlayer(Long player) {
         this.player = player;
     }
 

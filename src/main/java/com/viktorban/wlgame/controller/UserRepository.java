@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @see com.viktorban.wlgame.model.User
  */
 @PreAuthorize("hasAuthority('MODERATOR')")
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends UserRepositoryCustom, CrudRepository<User, Long> {
 
     /**
      * {@inheritDoc}
