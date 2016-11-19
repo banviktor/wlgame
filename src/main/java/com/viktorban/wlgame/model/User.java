@@ -25,7 +25,7 @@ public class User extends ResourceSupport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-   private Long id;
+    private Long id;
 
     /**
      * User's name.
@@ -183,19 +183,29 @@ public class User extends ResourceSupport {
         this.roles.add(role);
     }
 
+    /**
+     * Returns the list of rooms the player has ever joined.
+     *
+     * @return The list of rooms the player has ever joined.
+     */
     @JsonIgnore
     public List<RoomPlayer> getJoinedRooms() {
         return joinedRooms;
     }
 
+    /**
+     * Sets the list of rooms the player has ever joined.
+     *
+     * @param joinedRooms The list of rooms the player has ever joined.
+     */
     public void setJoinedRooms(List<RoomPlayer> joinedRooms) {
         this.joinedRooms = joinedRooms;
     }
 
     /**
-     * Returns the first non-ended room that the player has joined.
+     * Returns the first non-ended room's ID that the player has joined.
      *
-     * @return The first non-ended room that the player has joined.
+     * @return The first non-ended room's ID that the player has joined.
      */
     public Long getActiveRoomId() {
         for (RoomPlayer joinedRoom : joinedRooms) {
