@@ -60,6 +60,21 @@
         <button class="btn btn-success form-control" ng-click="roomCtrl.uploadWords()">Upload words</button>
     </div>
     <div ng-if="!roomCtrl.player.ready && roomCtrl.room.state == 'IN_PROGRESS'">
-        TODO upload solutions
+        <h3>Upload solutions</h3>
+        <table class="table table-striped table-borderless">
+            <thead>
+            <tr>
+                <th>{{roomCtrl.room.languageFrom.name | ucfirst}} word</th>
+                <th>{{roomCtrl.room.languageTo.name | ucfirst}} meaning</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="word in roomCtrl.words">
+                <td width="50%">{{word.word}}</td>
+                <td width="50%"><input type="text" style="width: 100%" ng-model="roomCtrl.solutionsToUpload[word.id]" required/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-success form-control" ng-click="roomCtrl.uploadSolutions()">Upload solutions</button>
     </div>
 </div>

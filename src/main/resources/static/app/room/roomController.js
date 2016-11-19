@@ -9,6 +9,8 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
     controller.player = {};
     controller.wordsToUpload = [];
     controller.translationsToUpload = [];
+    controller.words = [];
+    controller.solutionsToUpload = {};
 
     controller.refresh = function () {
         $http.get(controller.room._links.self.href).then(
@@ -16,9 +18,16 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                 controller.room = response.data;
                 if (controller.room.state == 'ENDED') {
                     controller.roomEnded();
-                } else {
-                    controller.refreshPlayers();
                 }
+                if (controller.words.length == 0 && controller.room.state == 'IN_PROGRESS') {
+                    controller.words = controller.room.words;
+                    for (var i = 0; i < controller.room.words.length; ++i) {
+                        if (!controller.solutionsToUpload.hasOwnProperty(controller.room.words[i].id)) {
+                            controller.solutionsToUpload[controller.room.words[i].id] = '';
+                        }
+                    }
+                }
+                controller.refreshPlayers();
             }
         );
     };
@@ -43,7 +52,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                     player.ready = player.uploadedWords;
                     break;
 
-                case 'WAITING_FOR_SOLUTIONS':
+                case 'IN_PROGRESS':
                     player.ready = player.uploadedSolutions;
                     break;
 
@@ -78,6 +87,13 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
             wordMap[controller.wordsToUpload[i]] = controller.translationsToUpload[i];
         }
         $http.post(controller.room._links.upload_words.href, wordMap).then(
+            function success () {
+                controller.refresh();
+            }
+        )
+    };
+    controller.uploadSolutions = function () {
+        $http.post(controller.room._links.upload_solutions.href, controller.solutionsToUpload).then(
             function success () {
                 controller.refresh();
             }
