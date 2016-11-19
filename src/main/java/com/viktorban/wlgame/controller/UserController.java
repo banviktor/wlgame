@@ -21,6 +21,9 @@ import javax.persistence.PersistenceContext;
 @RestController
 public class UserController {
 
+    /**
+     * JPA entity manager.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
