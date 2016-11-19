@@ -2,7 +2,6 @@ package com.viktorban.wlgame.controller;
 
 import com.viktorban.wlgame.Application;
 import com.viktorban.wlgame.model.User;
-import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
