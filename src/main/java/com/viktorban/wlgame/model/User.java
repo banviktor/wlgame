@@ -218,4 +218,12 @@ public class User extends ResourceSupport {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "User (id: " + getUserId() + ", name: " + getName() + ")";
+    }
+
 }
