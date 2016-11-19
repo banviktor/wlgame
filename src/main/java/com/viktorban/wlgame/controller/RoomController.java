@@ -204,7 +204,7 @@ public class RoomController implements Serializable {
     @Transactional
     @PreAuthorize("hasAuthority('PLAYER')")
     @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/upload_solutions")
-    public HttpEntity<?> uploadSolutions(@PathVariable("id") String id, @RequestBody Map<String, String> uploadedSolutions) {
+    public HttpEntity<?> uploadSolutions(@PathVariable("id") String id, @RequestBody Map<Long, String> uploadedSolutions) {
         try {
             long longId = Long.parseLong(id);
             Room room = entityManager.find(Room.class, longId);
@@ -213,15 +213,9 @@ public class RoomController implements Serializable {
             }
             User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
             List<Solution> solutionList = new ArrayList<>();
-            for (Map.Entry<String, String> uploadedSolution : uploadedSolutions.entrySet()) {
-                Word word;
-                try {
-                    word = (Word) entityManager
-                            .createQuery("SELECT w FROM com.viktorban.wlgame.model.Word w WHERE LOWER(w.word) = :word AND w.language = :language")
-                            .setParameter("language", room.getLanguageFrom())
-                            .setParameter("word", uploadedSolution.getKey().toLowerCase())
-                            .getSingleResult();
-                } catch (NoResultException e) {
+            for (Map.Entry<Long, String> uploadedSolution : uploadedSolutions.entrySet()) {
+                Word word = entityManager.find(Word.class, uploadedSolution.getKey());
+                if (word == null) {
                     throw new BadRequestException("Invalid uploaded solutions.");
                 }
                 Solution solution = new Solution(player, word, uploadedSolution.getValue());
