@@ -51,26 +51,28 @@
     <!-- Show the word upload table form -->
     <div ng-if="!roomCtrl.player.ready && roomCtrl.room.state == 'WAITING_FOR_WORDS'">
         <h3>Upload words</h3>
-        <table class="table table-striped table-borderless">
-            <thead>
+        <form name="upload_words" ng-submit="roomCtrl.uploadWords()">
+            <table class="table table-striped table-borderless">
+                <thead>
                 <tr>
                     <th>{{roomCtrl.room.languageFrom.name | ucfirst}} word</th>
                     <th>{{roomCtrl.room.languageTo.name | ucfirst}} meaning</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 <tr ng-repeat="i in range(1, 10)">
                     <td width="50%"><input type="text" class="form-control"  style="width: 100%" ng-model="roomCtrl.wordsToUpload[i]" required/></td>
                     <td width="50%"><input type="text" class="form-control"  style="width: 100%" ng-model="roomCtrl.translationsToUpload[i]" required/></td>
                 </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-success form-control" ng-click="roomCtrl.uploadWords()">Upload words</button>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-success form-control">Upload words</button>
+        </form>
     </div>
 
     <!-- Show the start memorizing form -->
     <div ng-if="roomCtrl.room.state == 'IN_PROGRESS' && roomCtrl.player.state == 'READY'">
-        <p class="lead">Everyone has uploaded their words. After you click on <em>Start memorizing</em> you will have 10 minutes to review the list of words. Then you'll take a test to see how many you managed to learn.</p>
+        <p>Everyone has uploaded their words. After you click on the button below you will have 10 minutes to review the list of words. Then you'll take a test to see how many you managed to learn.</p>
         <button class="btn btn-success form-control" ng-click="roomCtrl.startMemorizing()">Start memorizing</button>
     </div>
 
@@ -90,28 +92,31 @@
             </tr>
             </tbody>
         </table>
-        <p>If you feel ready to take the test, click on the button below with the label <em>I'm ready</em>.</p>
-        <button class="btn btn-success form-control" ng-click="roomCtrl.startSolving()">I'm ready</button>
+        <p>If you feel ready to take the test, click on the button below.</p>
+        <button class="btn btn-success form-control" ng-click="roomCtrl.startSolving()">Take the test</button>
     </div>
 
     <!-- Show the solution upload table form -->
     <div ng-if="roomCtrl.room.state == 'IN_PROGRESS' && roomCtrl.player.state == 'SOLVING'">
         <h3>Upload solutions</h3>
-        <table class="table table-striped table-borderless">
-            <thead>
-            <tr>
-                <th>{{roomCtrl.room.languageFrom.name | ucfirst}} word</th>
-                <th>{{roomCtrl.room.languageTo.name | ucfirst}} meaning</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="word in roomCtrl.words">
-                <td width="50%">{{word.word}}</td>
-                <td width="50%"><input type="text" class="form-control" style="width: 100%" ng-model="roomCtrl.solutionsToUpload[word.id]" required/></td>
-            </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-success form-control" ng-click="roomCtrl.uploadSolutions()">Upload solutions</button>
+        <form name="upload_solutions" ng-submit="roomCtrl.uploadSolutions()">
+            <table class="table table-striped table-borderless">
+                <thead>
+                <tr>
+                    <th>{{roomCtrl.room.languageFrom.name | ucfirst}} word</th>
+                    <th>{{roomCtrl.room.languageTo.name | ucfirst}} meaning</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="word in roomCtrl.words">
+                    <td width="50%">{{word.word}}</td>
+                    <td width="50%"><input type="text" class="form-control" style="width: 100%" ng-model="roomCtrl.solutionsToUpload[word.id]" required/></td>
+                </tr>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-success form-control">Upload solutions</button>
+        </form>
+
     </div>
 
     <!-- Show the results if the game has ended -->
@@ -137,7 +142,7 @@
         <p ng-if="!roomCtrl.evaluation.uninitialized && roomCtrl.evaluation.numIncorrect > 0">
             You managed to correctly translate {{roomCtrl.evaluation.numCorrect}} out of {{roomCtrl.evaluation.numSolutions}} words. Here are the ones you got wrong:
         </p>
-        <table class="table table-striped table-borderless" ng-if="roomCtrl.evaluation.done && roomCtrl.evaluation.numIncorrect > 0">
+        <table class="table table-striped table-borderless" ng-if="!roomCtrl.evaluation.uninitialized && roomCtrl.evaluation.numIncorrect > 0">
             <thead>
                 <tr>
                     <th width="25%">Word</th>

@@ -116,7 +116,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
         }
     };
     controller.roomEnded = function () {
-        clearInterval(controller.refresher);
+        refreshers.remove('room');
         if (controller.player.state == 'DONE') {
             controller.evaluate();
         }
@@ -178,6 +178,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                     }
                 }
                 controller.evaluation.uninitialized = false;
+                console.log(controller.evaluation);
             },
             user.handleUnauthenticated()
         );
