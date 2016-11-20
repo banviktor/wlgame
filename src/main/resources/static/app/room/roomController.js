@@ -33,7 +33,6 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
     controller.refreshRoom = function (room) {
         controller.room = room;
         controller.refreshPlayers();
-        controller.refreshTimeoutCountdown();
         controller.refreshState();
     };
     controller.refreshPlayers = function () {
