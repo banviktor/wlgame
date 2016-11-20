@@ -26,19 +26,19 @@
         </tr>
         <tr>
             <td>
-                <select ng-model="roomListCtrl.newRoom.languageFrom">
+                <select class="form-control" ng-model="roomListCtrl.newRoom.languageFrom">
                     <option value="en">English</option>
                     <option value="hu">Hungarian</option>
                 </select>
             </td>
             <td>
-                <select ng-model="roomListCtrl.newRoom.languageTo">
+                <select class="form-control" ng-model="roomListCtrl.newRoom.languageTo">
                     <option value="en">English</option>
                     <option value="hu">Hungarian</option>
                 </select>
             </td>
             <td>Create a new room</td>
-            <td>0/<input type="number" min="2" max="5" ng-model="roomListCtrl.newRoom.maxPlayers"/></td>
+            <td><input class="form-control" type="number" min="2" max="5" ng-model="roomListCtrl.newRoom.maxPlayers"/></td>
             <td>New</td>
             <td><button class="btn btn-success form-control" ng-click="roomListCtrl.createRoom()">Create</button></td>
         </tr>

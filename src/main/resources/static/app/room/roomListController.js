@@ -40,6 +40,10 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
         );
     };
     controller.createRoom = function () {
+        if (controller.newRoom.languageFrom == controller.newRoom.languageTo) {
+            alert('The languages have to differ.');
+            return;
+        }
         $http.post('api/rooms', controller.newRoom).then(
             function success (response) {
                 controller.redirectToRoom(response.data.id);
