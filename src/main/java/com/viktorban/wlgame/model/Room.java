@@ -10,6 +10,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.security.access.AccessDeniedException;
 
 import javax.persistence.*;
 import java.util.*;
@@ -257,17 +258,19 @@ public class Room extends ResourceSupport {
      * Moves the player into MEMORIZING state.
      *
      * @param player The player.
+     * @throws InvalidPlayerStateChangeException If the player is not in READY state.
+     * @throws PlayerNotPartOfRoomException      If the player is not part of the room.
      */
-    public synchronized void startMemorizing(User player) {
+    public synchronized void startMemorizing(User player) throws InvalidPlayerStateChangeException, PlayerNotPartOfRoomException {
         RoomPlayer roomPlayer = getRoomPlayer(player);
         if (roomPlayer != null) {
             if (roomPlayer.getState() == RoomPlayer.RoomPlayerState.READY) {
                 roomPlayer.setState(RoomPlayer.RoomPlayerState.MEMORIZING);
             } else {
-                // TODO throw exception
+                throw new InvalidPlayerStateChangeException();
             }
         } else {
-            // TODO throw exception
+            throw new PlayerNotPartOfRoomException();
         }
     }
 
@@ -275,17 +278,19 @@ public class Room extends ResourceSupport {
      * Moves the player into SOLVING state.
      *
      * @param player The player.
+     * @throws InvalidPlayerStateChangeException If the player is not in MEMORIZING state.
+     * @throws PlayerNotPartOfRoomException      If the player is not part of the room.
      */
-    public synchronized void startSolving(User player) {
+    public synchronized void startSolving(User player) throws InvalidPlayerStateChangeException, PlayerNotPartOfRoomException {
         RoomPlayer roomPlayer = getRoomPlayer(player);
         if (roomPlayer != null) {
             if (roomPlayer.getState() == RoomPlayer.RoomPlayerState.MEMORIZING) {
                 roomPlayer.setState(RoomPlayer.RoomPlayerState.SOLVING);
             } else {
-                // TODO throw exception
+                throw new InvalidPlayerStateChangeException();
             }
         } else {
-            // TODO throw exception
+            throw new PlayerNotPartOfRoomException();
         }
     }
 
