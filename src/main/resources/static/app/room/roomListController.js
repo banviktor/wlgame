@@ -1,23 +1,14 @@
-angular.module('WLGame').controller('RoomListController', function ($http, $location) {
+angular.module('WLGame').controller('RoomListController', function ($http, $location, user, refreshers) {
     var controller = this;
 
     controller.rooms = [];
+    controller.languages = [];
     controller.newRoom = {
         languageFrom: null,
         languageTo: null,
         maxPlayers: 2
     };
-    controller.languages = [];
 
-    controller.fetchLanguages = function () {
-        $http.get('api/languages').then(
-            function success (response) {
-                controller.languages = response.data;
-                controller.newRoom.languageFrom = controller.languages[0].id;
-                controller.newRoom.languageTo = controller.languages[1].id;
-            }
-        );
-    };
     controller.fetchRooms = function () {
         $http.get('api/rooms').then(
             function success (response) {
@@ -26,7 +17,18 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
                 } else {
                     controller.rooms = [];
                 }
-            }
+            },
+            user.handleUnauthenticated()
+        );
+    };
+    controller.fetchLanguages = function () {
+        $http.get('api/languages').then(
+            function success (response) {
+                controller.languages = response.data;
+                controller.newRoom.languageFrom = controller.languages[0].id;
+                controller.newRoom.languageTo = controller.languages[1].id;
+            },
+            user.handleUnauthenticated()
         );
     };
     controller.joinRoom = function (room) {
@@ -34,9 +36,7 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
             function success () {
                 controller.redirectToRoom(room.id);
             },
-            function error() {
-                alert('Failed to join room.');
-            }
+            user.handleUnauthenticated()
         );
     };
     controller.createRoom = function () {
@@ -44,17 +44,13 @@ angular.module('WLGame').controller('RoomListController', function ($http, $loca
             function success (response) {
                 controller.redirectToRoom(response.data.id);
             },
-            function error () {
-                alert('Failed to create room.');
-            }
+            user.handleUnauthenticated()
         );
     };
     controller.redirectToRoom = function (roomID) {
-        clearInterval(controller.refresher);
         $location.path('rooms/' + roomID);
     };
 
     controller.fetchLanguages();
-    controller.fetchRooms();
-    controller.refresher = setInterval(controller.fetchRooms, 3000);
+    refreshers.add('room', controller.fetchRooms, 1000, true);
 });

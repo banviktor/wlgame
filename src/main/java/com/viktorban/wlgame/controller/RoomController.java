@@ -125,6 +125,7 @@ public class RoomController implements Serializable {
      * @return The open game rooms.
      */
     @RequestMapping(method = RequestMethod.GET, path = "/api/rooms")
+    @PreAuthorize("hasAuthority('PLAYER')")
     public HttpEntity<?> getRooms() {
         return new ResponseEntity<>(new Resources(
                 entityManager.createQuery("SELECT r FROM com.viktorban.wlgame.model.Room r WHERE r.state <> 'ENDED'").getResultList(),
@@ -281,8 +282,113 @@ public class RoomController implements Serializable {
             room.uploadWords(player, wordList);
             entityManager.flush();
             return new ResponseEntity<>(room, HttpStatus.OK);
+        } catch (NumberFormatException | NoResultException e) {
+            throw new ResourceNotFoundException();
         }
-        catch (NumberFormatException | NoResultException e) {
+    }
+
+    /**
+     * Moves the player to the MEMORIZING state.
+     *
+     * @param id The room's ID.
+     * @return The room's details.
+     */
+    @Transactional
+    @PreAuthorize("hasAuthority('PLAYER')")
+    @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/start_memorizing")
+    public HttpEntity<?> startMemorizing(@PathVariable("id") String id) {
+        try {
+            // Get the room and the player.
+            Long longId = Long.parseLong(id);
+            Room room = entityManager.find(Room.class, longId);
+            if (room == null) {
+                throw new NoResultException();
+            }
+            User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+            room.startMemorizing(player);
+            entityManager.flush();
+            return new ResponseEntity<>(room, HttpStatus.OK);
+        } catch (NumberFormatException | NoResultException e) {
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    /**
+     * Returns the list of uploaded words.
+     *
+     * @param id The room's ID.
+     * @return The list of uploaded words.
+     */
+    @Transactional
+    @PreAuthorize("hasAuthority('PLAYER')")
+    @RequestMapping(method = RequestMethod.GET, path = "/api/rooms/{id}/words")
+    public HttpEntity<?> getWords(@PathVariable("id") String id) {
+        try {
+            // Get the room and the player.
+            Long longId = Long.parseLong(id);
+            Room room = entityManager.find(Room.class, longId);
+            if (room == null) {
+                throw new NoResultException();
+            }
+            if (room.getState() == Room.RoomState.IN_PROGRESS || room.getState() == Room.RoomState.ENDED) {
+                return new ResponseEntity<>(room.getWords(), HttpStatus.OK);
+            }
+            throw new AccessDeniedException("Words can only be requested when the game is in progress.");
+        } catch (NumberFormatException | NoResultException e) {
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    /**
+     * Returns the list of translations for each word in a map.
+     *
+     * @param id The room's ID.
+     * @return The translation map.
+     */
+    @Transactional
+    @PreAuthorize("hasAuthority('PLAYER')")
+    @RequestMapping(method = RequestMethod.GET, path = "/api/rooms/{id}/translations")
+    public HttpEntity<?> getTranslations(@PathVariable("id") String id) {
+        try {
+            // Get the room and the player.
+            Long longId = Long.parseLong(id);
+            Room room = entityManager.find(Room.class, longId);
+            if (room == null) {
+                throw new NoResultException();
+            }
+            User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+            RoomPlayer roomPlayer = room.getRoomPlayer(player);
+            if (roomPlayer == null || roomPlayer.getState() == RoomPlayer.RoomPlayerState.MEMORIZING) {
+                return new ResponseEntity<>(room.getTranslations(), HttpStatus.OK);
+            }
+            throw new AccessDeniedException("Translations can only be requested during memorizing.");
+        } catch (NumberFormatException | NoResultException e) {
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    /**
+     * Moves the player to the SOLVING state.
+     *
+     * @param id The room's ID.
+     * @return The room's details.
+     */
+    @Transactional
+    @PreAuthorize("hasAuthority('PLAYER')")
+    @RequestMapping(method = RequestMethod.POST, path = "/api/rooms/{id}/start_solving")
+    public HttpEntity<?> startSolving(@PathVariable("id") String id) {
+        try {
+            // Get the room and the player.
+            Long longId = Long.parseLong(id);
+            Room room = entityManager.find(Room.class, longId);
+            if (room == null) {
+                throw new NoResultException();
+            }
+            User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+            room.startSolving(player);
+            entityManager.flush();
+            return new ResponseEntity<>(room, HttpStatus.OK);
+        } catch (NumberFormatException | NoResultException e) {
             throw new ResourceNotFoundException();
         }
     }
@@ -325,6 +431,34 @@ public class RoomController implements Serializable {
             return new ResponseEntity<>(room, HttpStatus.OK);
         }
         catch (NumberFormatException | NoResultException e) {
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    /**
+     * Returns the list of solutions the player uploaded into the room.
+     *
+     * @param id The room's ID.
+     * @return The uploaded solutions.
+     */
+    @Transactional
+    @PreAuthorize("hasAuthority('PLAYER')")
+    @RequestMapping(method = RequestMethod.GET, path = "/api/rooms/{id}/solutions")
+    public HttpEntity<?> getSolutions(@PathVariable("id") String id) {
+        try {
+            // Get the room and the player.
+            Long longId = Long.parseLong(id);
+            Room room = entityManager.find(Room.class, longId);
+            if (room == null) {
+                throw new NoResultException();
+            }
+            User player = entityManager.find(User.class, Application.getCurrentUser().getUserId());
+            RoomPlayer roomPlayer = room.getRoomPlayer(player);
+            if (roomPlayer.getState() == RoomPlayer.RoomPlayerState.DONE) {
+                return new ResponseEntity<>(room.getSolutions(player), HttpStatus.OK);
+            }
+            throw new AccessDeniedException("Solutions can only be requested after they are uploaded.");
+        } catch (NumberFormatException | NoResultException e) {
             throw new ResourceNotFoundException();
         }
     }

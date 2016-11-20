@@ -184,13 +184,12 @@ public class Solution {
     }
 
     /**
-     * Returns the comma-separated list of translations of the word.
+     * Returns the list of translations of the word.
      *
-     * @return The comma-separated list of translations of the word.
+     * @return The list of translations of the word.
      */
-    public String getExpected() {
-        List<String> translations = word.getTranslations(room.getLanguageTo()).stream().map(Word::getWord).collect(Collectors.toList());
-        return String.join("; ", translations);
+    public List<String> getExpected() {
+        return word.getTranslationStrings(room.getLanguageTo());
     }
 
 }

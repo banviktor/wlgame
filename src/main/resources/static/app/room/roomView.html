@@ -6,21 +6,25 @@
     <div class="player player-self">
         <table class="table table-borderless">
             <tr ng-repeat="player in roomCtrl.players" ng-class="player.self ? 'active' : ''">
+                <!-- Real player -->
                 <td ng-if="!player.placeholder">
                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                </td>
-                <td ng-if="player.placeholder">
-                    <span class="glyphicon glyphicon-hourglass" aria-hidden="true" style="color:orange"></span>
                 </td>
                 <td ng-if="!player.placeholder" width="100%">
                     <strong>{{player.name}}</strong>
                 </td>
+                <td ng-if="!player.placeholder">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true" style="color:green" ng-if="player.ready && player.state != 'TIMED_OUT'"></span>
+                    <span class="glyphicon glyphicon-time" aria-hidden="true" style="color:orange" ng-if="!player.ready && player.state != 'TIMED_OUT'"></span>
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true" style="color:darkred" ng-if="player.state == 'TIMED_OUT'"></span>
+                </td>
+
+                <!-- Placeholder -->
+                <td ng-if="player.placeholder">
+                    <span class="glyphicon glyphicon-hourglass" aria-hidden="true" style="color:orange"></span>
+                </td>
                 <td ng-if="player.placeholder" colspan="2">
                     <em>Waiting for player...</em>
-                </td>
-                <td ng-if="!player.placeholder">
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true" style="color:green" ng-if="player.ready"></span>
-                    <span class="glyphicon glyphicon-time" aria-hidden="true" style="color:orange" ng-if="!player.ready"></span>
                 </td>
             </tr>
         </table>
@@ -28,6 +32,8 @@
 </div>
 <div class="col-sm-9">
     <h2 ng-if="roomCtrl.room.state != 'ENDED'">Game</h2>
+
+    <!-- Show message when waiting for other players -->
     <div class="alert alert-info" role="alert" ng-if="roomCtrl.room.state != 'ENDED' && roomCtrl.player.ready">
         <div class="progress">
             <div class="progress-bar" role="progressbar" aria-valuenow="{{100 * roomCtrl.readyPlayersCount / roomCtrl.room.maxPlayers}}" aria-valuemin="0" aria-valuemax="100" style="width: {{100 * roomCtrl.readyPlayersCount / roomCtrl.room.maxPlayers}}%;">
@@ -41,6 +47,8 @@
         <span ng-if="roomCtrl.room.state == 'IN_PROGRESS'">upload their solutions</span>
         <span>.</span>
     </div>
+
+    <!-- Show the word upload table form -->
     <div ng-if="!roomCtrl.player.ready && roomCtrl.room.state == 'WAITING_FOR_WORDS'">
         <h3>Upload words</h3>
         <table class="table table-striped table-borderless">
@@ -59,7 +67,35 @@
         </table>
         <button class="btn btn-success form-control" ng-click="roomCtrl.uploadWords()">Upload words</button>
     </div>
-    <div ng-if="!roomCtrl.player.ready && roomCtrl.room.state == 'IN_PROGRESS'">
+
+    <!-- Show the start memorizing form -->
+    <div ng-if="roomCtrl.room.state == 'IN_PROGRESS' && roomCtrl.player.state == 'READY'">
+        <p class="lead">Everyone has uploaded their words. After you click on <em>Start memorizing</em> you will have 10 minutes to review the list of words. Then you'll take a test to see how many you managed to learn.</p>
+        <button class="btn btn-success form-control" ng-click="roomCtrl.startMemorizing()">Start memorizing</button>
+    </div>
+
+    <!-- Show the words to memorize -->
+    <div ng-if="roomCtrl.room.state == 'IN_PROGRESS' && roomCtrl.player.state == 'MEMORIZING'">
+        <table class="table table-striped table-borderless">
+            <thead>
+            <tr>
+                <th>{{ roomCtrl.room.languageFrom.name | ucfirst }} word</th>
+                <th>{{ roomCtrl.room.languageTo.name | ucfirst }} translation(s)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="word in roomCtrl.words">
+                <td width="40%">{{ word.word }}</td>
+                <td width="60%">{{ word.translations.join('; ') }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <p>If you feel ready to take the test, click on the button below with the label <em>I'm ready</em>.</p>
+        <button class="btn btn-success form-control" ng-click="roomCtrl.startSolving()">I'm ready</button>
+    </div>
+
+    <!-- Show the solution upload table form -->
+    <div ng-if="roomCtrl.room.state == 'IN_PROGRESS' && roomCtrl.player.state == 'SOLVING'">
         <h3>Upload solutions</h3>
         <table class="table table-striped table-borderless">
             <thead>
@@ -77,6 +113,8 @@
         </table>
         <button class="btn btn-success form-control" ng-click="roomCtrl.uploadSolutions()">Upload solutions</button>
     </div>
+
+    <!-- Show the results if the game has ended -->
     <h2 ng-if="roomCtrl.room.state == 'ENDED'">Results</h2>
     <div ng-if="roomCtrl.room.state == 'ENDED' && !roomCtrl.room.timedOut">
         <p class="lead" ng-if="roomCtrl.player.winner">
@@ -88,10 +126,15 @@
         <p class="lead" ng-if="!roomCtrl.player.winner && roomCtrl.room.winners.length != 1">
             The winners are <strong>{{roomCtrl.room.winners.join(', ')}}</strong>!
         </p>
-        <p ng-if="roomCtrl.evaluation.done && roomCtrl.evaluation.numIncorrect == 0">
+
+        <!-- Evaluation -->
+        <p ng-if="player.state == 'TIMED_OUT'">
+            You didn't manage to upload your solutions in time. Please try to keep up next time.
+        </p>
+        <p ng-if="!roomCtrl.evaluation.uninitialized && roomCtrl.evaluation.numIncorrect == 0">
             You managed to correctly translate all of the words! Keep it up!
         </p>
-        <p ng-if="roomCtrl.evaluation.done && roomCtrl.evaluation.numIncorrect > 0">
+        <p ng-if="!roomCtrl.evaluation.uninitialized && roomCtrl.evaluation.numIncorrect > 0">
             You managed to correctly translate {{roomCtrl.evaluation.numCorrect}} out of {{roomCtrl.evaluation.numSolutions}} words. Here are the ones you got wrong:
         </p>
         <table class="table table-striped table-borderless" ng-if="roomCtrl.evaluation.done && roomCtrl.evaluation.numIncorrect > 0">
@@ -111,7 +154,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Show timeout message -->
     <div class="alert alert-warning" role="alert" ng-if="roomCtrl.room.timedOut">
-        The game has timed out because one or more players didn't complete the task in time.
+        The game has timed out because one or more players didn't upload words in time.
     </div>
 </div>

@@ -1,18 +1,8 @@
-angular.module('WLGame').factory('user', function ($location, $http) {
+angular.module('WLGame').factory('user', function ($location, $route, $http, refreshers) {
     var service = {};
 
     service.user = null;
-    service.isLoggedIn = function () {
-        return service.user != null;
-    };
-    service.redirectToLogin = function () {
-        $location.path('/login');
-    };
-    service.requireLogin = function () {
-        if (!service.isLoggedIn()) {
-            service.redirectToLogin();
-        }
-    };
+
     service.update = function (redirectTo) {
         $http.get('api/self').then(
             function success(response) {
@@ -21,15 +11,32 @@ angular.module('WLGame').factory('user', function ($location, $http) {
                     $location.path(redirectTo);
                 }
             },
-            function error(response) {
-                service.user = null;
-                if (redirectTo !== undefined) {
-                    $location.path(redirectTo);
+            function error() {
+                var route = $route.routes[$location.path()];
+                if (route === undefined || (route.controller != 'LoginController' && route.controller != 'RegistrationController')) {
+                    $location.path('/login');
+                    refreshers.clear();
+                    service.setUpAutomaticRefresh();
                 }
             }
         );
     };
-    service.update($location.path());
+    service.handleUnauthenticated = function (customCallback, onUnauthenticated) {
+        return function (response) {
+            if (response.status == 401) {
+                service.update();
+                if (onUnauthenticated !== undefined) {
+                    onUnauthenticated(response);
+                }
+            } else if (customCallback !== undefined) {
+                customCallback(response);
+            }
+        }
+    };
+    service.setUpAutomaticRefresh = function () {
+        refreshers.add('user', service.update, 15000, true);
+    };
 
+    service.setUpAutomaticRefresh();
     return service;
 });

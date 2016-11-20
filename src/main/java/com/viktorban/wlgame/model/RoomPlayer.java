@@ -2,6 +2,7 @@ package com.viktorban.wlgame.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Entity for additional columns in the Room-Player join table.
@@ -75,6 +76,18 @@ public class RoomPlayer {
     }
 
     /**
+     * Enumeration to represent different player states.
+     */
+    public enum RoomPlayerState {
+        JOINED, WAITING_FOR_ROOM, READY, MEMORIZING, SOLVING, DONE, TIMED_OUT
+    }
+
+    /**
+     * The time each player can spend on memorizing the words.
+     */
+    public static final long timeoutMemorize = 10 * 60 * 1000L;
+
+    /**
      * The room in the association.
      */
     @Id
@@ -91,23 +104,24 @@ public class RoomPlayer {
     private User player;
 
     /**
-     * Whether the player has uploaded words into the room.
+     * The player's state.
      */
-    @Column(name = "uploaded_words")
-    private Boolean uploadedWords;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    private RoomPlayerState state;
 
     /**
-     * Whether the player has uploaded solutions into the room.
+     * The time when the player started memorizing the words.
      */
-    @Column(name = "uploaded_solutions")
-    private Boolean uploadedSolutions;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "started_memorizing")
+    private Date startedMemorizing;
 
     /**
      * RoomPlayer default constructor.
      */
     public RoomPlayer() {
-        uploadedWords = false;
-        uploadedSolutions = false;
+        state = RoomPlayerState.JOINED;
     }
 
     /**
@@ -168,39 +182,42 @@ public class RoomPlayer {
     }
 
     /**
-     * Returns whether the player has uploaded words.
+     * Returns the player's state.
      *
-     * @return Whether the player has uploaded words.
+     * @return The player's state.
      */
-    public Boolean getUploadedWords() {
-        return uploadedWords;
+    public RoomPlayerState getState() {
+        return state;
     }
 
     /**
-     * Sets whether the player has uploaded words.
+     * Sets the player's state.
      *
-     * @param uploadedWords Whether the player has uploaded words.
+     * @param state The player's state.
      */
-    public void setUploadedWords(Boolean uploadedWords) {
-        this.uploadedWords = uploadedWords;
+    public void setState(RoomPlayerState state) {
+        if (state == RoomPlayerState.MEMORIZING) {
+            startedMemorizing = new Date();
+        }
+        this.state = state;
     }
 
     /**
-     * Returns whether the player has uploaded solutions.
+     * Returns the time when the player started memorizing the words.
      *
-     * @return Whether the player has uploaded solutions.
+     * @return The time when the player started memorizing the words.
      */
-    public Boolean getUploadedSolutions() {
-        return uploadedSolutions;
+    public Date getStartedMemorizing() {
+        return startedMemorizing;
     }
 
     /**
-     * Sets whether the player has uploaded solutions.
+     * Sets the time when the player started memorizing the words.
      *
-     * @param uploadedSolutions Whether the player has uploaded solutions.
+     * @param startedMemorizing The time when the player started memorizing the words.
      */
-    public void setUploadedSolutions(Boolean uploadedSolutions) {
-        this.uploadedSolutions = uploadedSolutions;
+    public void setStartedMemorizing(Date startedMemorizing) {
+        this.startedMemorizing = startedMemorizing;
     }
 
 }

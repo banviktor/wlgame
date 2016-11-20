@@ -1,6 +1,7 @@
 package com.viktorban.wlgame.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -142,6 +143,16 @@ public class Word {
      */
     public List<Word> getTranslations(Language language) {
         return getTranslations().stream().filter(translation -> translation.language.equals(language)).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of translations for the word in the given language.
+     *
+     * @param language The language
+     * @return List of translations.
+     */
+    public List<String> getTranslationStrings(Language language) {
+        return getTranslations(language).stream().map(Word::getWord).collect(Collectors.toList());
     }
 
     /**

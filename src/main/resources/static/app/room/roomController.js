@@ -1,4 +1,4 @@
-angular.module('WLGame').controller('RoomController', function ($http, $routeParams, user) {
+angular.module('WLGame').controller('RoomController', function ($http, $routeParams, user, refreshers) {
     var controller = this;
 
     controller.room = {
@@ -9,36 +9,32 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
     controller.player = {
         winner: false,
         placeholder: false,
-        uploadedWords: false,
-        uploadedSolutions: false,
+        ready: false,
         self: true
     };
     controller.wordsToUpload = [];
     controller.translationsToUpload = [];
     controller.words = [];
-    controller.solutionsToUpload = {};
+    controller.solutionsToUpload = {
+        uninitialized: true
+    };
     controller.evaluation = {
-        done: false
+        uninitialized: true
     };
 
     controller.refresh = function () {
         $http.get(controller.room._links.self.href).then(
             function success (response) {
-                controller.room = response.data;
-                if (controller.room.state == 'ENDED') {
-                    controller.roomEnded();
-                }
-                if (controller.words.length == 0 && controller.room.state == 'IN_PROGRESS') {
-                    controller.words = controller.room.words;
-                    for (var i = 0; i < controller.room.words.length; ++i) {
-                        if (!controller.solutionsToUpload.hasOwnProperty(controller.room.words[i].id)) {
-                            controller.solutionsToUpload[controller.room.words[i].id] = '';
-                        }
-                    }
-                }
-                controller.refreshPlayers();
-            }
+                controller.refreshRoom(response.data);
+            },
+            user.handleUnauthenticated()
         );
+    };
+    controller.refreshRoom = function (room) {
+        controller.room = room;
+        controller.refreshPlayers();
+        controller.refreshTimeoutCountdown();
+        controller.refreshState();
     };
     controller.refreshPlayers = function () {
         controller.players = [];
@@ -48,8 +44,7 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                 winner: false,
                 placeholder: false,
                 name: controller.room.roomPlayers[i].playerName,
-                uploadedWords: controller.room.roomPlayers[i].uploadedWords,
-                uploadedSolutions: controller.room.roomPlayers[i].uploadedSolutions,
+                state: controller.room.roomPlayers[i].state,
                 self: controller.room.roomPlayers[i].playerName == user.user.name
             };
             switch (controller.room.state) {
@@ -59,11 +54,11 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
                     break;
 
                 case 'WAITING_FOR_WORDS':
-                    player.ready = player.uploadedWords;
+                    player.ready = player.state == 'WAITING_FOR_ROOM';
                     break;
 
                 case 'IN_PROGRESS':
-                    player.ready = player.uploadedSolutions;
+                    player.ready = player.state == 'DONE';
                     break;
 
                 default:
@@ -88,9 +83,42 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
             });
         }
     };
+    controller.refreshState = function () {
+        if (controller.room.state == 'ENDED') {
+            controller.roomEnded();
+        }
+        if (controller.player.state == 'MEMORIZING' && controller.words.length == 0) {
+            $http.get(controller.room._links.words.href).then(
+                function success (response) {
+                    for (var i = 0; i < response.data.length; ++i) {
+                        controller.words.push({
+                            id: response.data[i].id,
+                            word: response.data[i].word,
+                            translations: []
+                        });
+                    }
+                    $http.get(controller.room._links.translations.href).then(
+                        function success (response) {
+                            for (var i = 0; i < controller.words.length; ++i) {
+                                controller.words[i].translations = response.data[controller.words[i].id];
+                            }
+                        },
+                        user.handleUnauthenticated()
+                    );
+                },
+                user.handleUnauthenticated()
+            );
+        }
+        if (controller.player.state == 'SOLVING' && controller.solutionsToUpload.hasOwnProperty('uninitialized')) {
+            delete controller.solutionsToUpload.uninitialized;
+            for (var i = 0; i < controller.words.length; ++i) {
+                controller.solutionsToUpload[controller.words[i].id] = '';
+            }
+        }
+    };
     controller.roomEnded = function () {
         clearInterval(controller.refresher);
-        if (controller.room.solutions.length > 0) {
+        if (controller.player.state == 'DONE') {
             controller.evaluate();
         }
     };
@@ -102,37 +130,59 @@ angular.module('WLGame').controller('RoomController', function ($http, $routePar
         $http.post(controller.room._links.upload_words.href, wordMap).then(
             function success () {
                 controller.refresh();
-            }
+            },
+            user.handleUnauthenticated()
         )
+    };
+    controller.startMemorizing = function () {
+        $http.post(controller.room._links.start_memorizing.href, {}).then(
+            function success (response) {
+                controller.refreshRoom(response.data);
+            },
+            user.handleUnauthenticated()
+        );
+    };
+    controller.startSolving = function () {
+        $http.post(controller.room._links.start_solving.href, {}).then(
+            function success (response) {
+                controller.refreshRoom(response.data);
+            },
+            user.handleUnauthenticated()
+        );
     };
     controller.uploadSolutions = function () {
         $http.post(controller.room._links.upload_solutions.href, controller.solutionsToUpload).then(
             function success () {
                 controller.refresh();
-            }
+            },
+            user.handleUnauthenticated()
         )
     };
     controller.evaluate = function () {
-        controller.evaluation.numCorrect = 0;
-        controller.evaluation.numIncorrect = 0;
-        controller.evaluation.numSolutions = controller.room.solutions.length;
-        controller.evaluation.mistakes = [];
-        for (var i = 0; i < controller.room.solutions.length; ++i) {
-            var solution = controller.room.solutions[i];
-            if (solution.correct) {
-                ++controller.evaluation.numCorrect;
-            } else {
-                ++controller.evaluation.numIncorrect;
-                controller.evaluation.mistakes.push({
-                    word: solution.word.word,
-                    expected: solution.expected,
-                    input: solution.input
-                });
-            }
-        }
-        controller.evaluation.done = true;
+        $http.get(controller.room._links.solutions.href).then(
+            function (response) {
+                controller.evaluation.numCorrect = 0;
+                controller.evaluation.numIncorrect = 0;
+                controller.evaluation.numSolutions = response.data.length;
+                controller.evaluation.mistakes = [];
+                for (var i = 0; i < response.data.length; ++i) {
+                    var solution = response.data[i];
+                    if (solution.correct) {
+                        ++controller.evaluation.numCorrect;
+                    } else {
+                        ++controller.evaluation.numIncorrect;
+                        controller.evaluation.mistakes.push({
+                            word: solution.word.word,
+                            expected: solution.expected.join('; '),
+                            input: solution.input
+                        });
+                    }
+                }
+                controller.evaluation.uninitialized = false;
+            },
+            user.handleUnauthenticated()
+        );
     };
 
-    controller.refresh();
-    controller.refresher = setInterval(controller.refresh, 3000);
+    refreshers.add('room', controller.refresh, 1000, true);
 });
