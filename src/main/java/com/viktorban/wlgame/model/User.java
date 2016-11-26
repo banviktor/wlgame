@@ -57,8 +57,8 @@ public class User extends ResourceSupport {
     @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(
             name = "users_roles",
-            joinColumns = @JoinColumn(name="uid", referencedColumnName="id"),
-            inverseJoinColumns = @JoinColumn(name="rid", referencedColumnName="id")
+            joinColumns = @JoinColumn(name="user_id", referencedColumnName="id"),
+            inverseJoinColumns = @JoinColumn(name="role_id", referencedColumnName="id")
     )
     private List<Role> roles;
 
