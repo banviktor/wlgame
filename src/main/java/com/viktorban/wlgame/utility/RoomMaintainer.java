@@ -1,5 +1,7 @@
-package com.viktorban.wlgame.model;
+package com.viktorban.wlgame.utility;
 
+import com.viktorban.wlgame.model.Room;
+import com.viktorban.wlgame.model.RoomPlayer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.annotation.Scheduled;
