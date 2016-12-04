@@ -6,6 +6,7 @@ import com.viktorban.wlgame.model.User;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -34,40 +35,52 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     @Override
     @Transactional
     public <S extends User> S save(S s) {
-        // New user creation aka registration is publicly allowed.
         if (s.getUserId() == null) {
-            // Override roles and enabled.
-            s.setRoles(new ArrayList<>());
-            s.addRole(Role.ROLE_PLAYER);
-            s.setEnabled(true);
-
-            // Save new user.
-            entityManager.persist(s);
-            log.info("Registered " + s.toString());
-            if (Application.getCurrentUser() == null) {
-                Application.forceLogin(s);
-            }
-            return s;
+            return create(s);
         }
 
-        // User modification without logging in is unauthorized.
+        return update(s);
+    }
+
+    /**
+     * Stores a new User entity into the database.
+     *
+     * @param user The User object to store.
+     * @return The stored User.
+     */
+    private <S extends User> S create(S user) {
+        // Override roles and enabled.
+        user.setRoles(new ArrayList<>());
+        user.addRole(Role.ROLE_PLAYER);
+        user.setEnabled(true);
+
+        // Save new user.
+        entityManager.persist(user);
+        log.info("Registered " + user.toString());
         if (Application.getCurrentUser() == null) {
+            Application.forceLogin(user);
+        }
+        return user;
+    }
+
+    /**
+     * Updates a User entity's data in the database.
+     *
+     * @param user The User entity to update.
+     * @return The updated User.
+     */
+    @PreAuthorize("hasAuthority('PLAYER')")
+    private <S extends User> S update(S user) {
+        boolean isModerator = Application.getCurrentUser().getRoles().contains(Role.ROLE_MODERATOR);
+        boolean isAdministrator = Application.getCurrentUser().getRoles().contains(Role.ROLE_ADMINISTRATOR);
+        boolean self = user.getUserId().equals(Application.getCurrentUser().getUserId());
+
+        if (self || isModerator || isAdministrator) {
+            entityManager.persist(user);
+            return user;
+        } else {
             throw new AccessDeniedException("Not authorized.");
         }
-
-        // Everyone can modify themselves, moderators and administrators can modify others too.
-        if (Application.getCurrentUser().getRoles().contains(Role.ROLE_MODERATOR) || Application.getCurrentUser().getRoles().contains(Role.ROLE_ADMINISTRATOR)) {
-            entityManager.persist(s);
-            return s;
-        } else if (s.getUserId().equals(Application.getCurrentUser().getUserId())) {
-            s.setRoles(new ArrayList<>());
-            s.addRole(Role.ROLE_PLAYER);
-            entityManager.persist(s);
-            return s;
-        }
-
-        // Anything else is unauthorized.
-        throw new AccessDeniedException("Not authorized.");
     }
 
     /**
